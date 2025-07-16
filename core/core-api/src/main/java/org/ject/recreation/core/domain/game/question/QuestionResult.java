@@ -1,6 +1,6 @@
-package org.ject.recreation.core.api.controller.response;
+package org.ject.recreation.core.domain.game.question;
 
-public record QuestionListItemResponse(
+public record QuestionResult(
         long questionId,
         int questionOrder,
         String imageUrl,

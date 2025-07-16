@@ -7,5 +7,14 @@ public record GameDetailResponseDto(
         String nickname,
         int questionCount,
         long version,
-        List<QuestionListItemResponse> questions
-) { }
+        List<QuestionDto> questions
+) {
+    public record QuestionDto(
+            long questionId,
+            int questionOrder,
+            String imageUrl,
+            String questionText,
+            String questionAnswer,
+            long version
+    ) { }
+}

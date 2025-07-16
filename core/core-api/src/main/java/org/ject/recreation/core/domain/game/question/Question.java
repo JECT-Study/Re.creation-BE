@@ -16,7 +16,7 @@ public record Question(
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 ) {
-    public static Question of(QuestionEntity question) {
+    public static Question from(QuestionEntity question) {
         return new Question(
                 question.getQuestionId(),
                 question.getGameId(),

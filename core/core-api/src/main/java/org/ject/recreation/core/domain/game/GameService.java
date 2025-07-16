@@ -2,6 +2,7 @@ package org.ject.recreation.core.domain.game;
 
 import org.ject.recreation.core.domain.game.question.Question;
 import org.ject.recreation.core.domain.game.question.QuestionReader;
+import org.ject.recreation.core.domain.game.question.QuestionResult;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,12 +33,23 @@ public class GameService {
         Game game = gameReader.getGameByGameId(gameId);
         List<Question> questions = questionReader.getQuestionsByGameId(gameId);
 
+        String gameCreatorEmail = game.gameCreatorEmail();
+        String gameCreatorNickname = "test_nickname"; // TODO: 실제 닉네임을 사용자 정보로부터 가져와야 함
+
         return new GameDetailResult(
                 game.gameTitle(),
-                "test_nickname", // TODO: 실제 닉네임을 사용자 정보로부터 가져와야 함
+                gameCreatorNickname,
                 game.questionCount(),
                 game.version(),
-                questions
+                questions.stream()
+                        .map(question -> new QuestionResult(
+                                question.questionId(),
+                                question.questionOrder(),
+                                question.imageUrl(),
+                                question.questionText(),
+                                question.questionAnswer(),
+                                question.version()))
+                        .toList()
         );
     }
 }

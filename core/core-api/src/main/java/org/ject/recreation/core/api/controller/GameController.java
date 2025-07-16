@@ -4,7 +4,6 @@ import org.ject.recreation.core.api.controller.request.GameListRequestDto;
 import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.GameListItemResponse;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
-import org.ject.recreation.core.api.controller.response.QuestionListItemResponse;
 import org.ject.recreation.core.domain.game.GameDetailResult;
 import org.ject.recreation.core.domain.game.GameListResult;
 import org.ject.recreation.core.domain.game.GameService;
@@ -50,14 +49,13 @@ public class GameController {
                 gameDetailResult.questionCount(),
                 gameDetailResult.version(),
                 gameDetailResult.questions().stream()
-                        .map(question -> new QuestionListItemResponse(
+                        .map(question -> new GameDetailResponseDto.QuestionDto(
                                 question.questionId(),
                                 question.questionOrder(),
                                 question.imageUrl(),
                                 question.questionText(),
                                 question.questionAnswer(),
-                                question.version()
-                        ))
+                                question.version()))
                         .toList()
         ));
 
