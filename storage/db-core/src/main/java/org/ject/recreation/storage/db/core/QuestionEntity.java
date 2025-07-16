@@ -1,9 +1,11 @@
 package org.ject.recreation.storage.db.core;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
 import java.util.UUID;
 
+@Data
 @Entity
 @Table(name="question")
 public class QuestionEntity extends BaseEntity {

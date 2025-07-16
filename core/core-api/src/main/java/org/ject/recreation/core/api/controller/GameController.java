@@ -1,15 +1,17 @@
 package org.ject.recreation.core.api.controller;
 
 import org.ject.recreation.core.api.controller.request.GameListRequestDto;
+import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.GameListItemResponse;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
+import org.ject.recreation.core.api.controller.response.QuestionListItemResponse;
+import org.ject.recreation.core.domain.game.GameDetailResult;
 import org.ject.recreation.core.domain.game.GameListResult;
 import org.ject.recreation.core.domain.game.GameService;
 import org.ject.recreation.core.support.response.ApiResponse;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/games")
@@ -36,6 +38,29 @@ public class GameController {
                         ))
                         .toList()
         ));
+    }
+
+    @GetMapping("/{gameId}")
+    public ApiResponse<GameDetailResponseDto> getGameDetail(@PathVariable UUID gameId) {
+        GameDetailResult gameDetailResult = gameService.getGameDetail(gameId);
+
+        return ApiResponse.success(new GameDetailResponseDto(
+                gameDetailResult.gameTitle(),
+                gameDetailResult.nickname(),
+                gameDetailResult.questionCount(),
+                gameDetailResult.version(),
+                gameDetailResult.questions().stream()
+                        .map(question -> new QuestionListItemResponse(
+                                question.questionId(),
+                                question.questionOrder(),
+                                question.imageUrl(),
+                                question.questionText(),
+                                question.questionAnswer(),
+                                question.version()
+                        ))
+                        .toList()
+        ));
+
     }
 
 }
