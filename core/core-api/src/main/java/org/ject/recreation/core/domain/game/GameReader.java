@@ -16,7 +16,7 @@ public class GameReader {
         this.gameRepository = gameRepository;
     }
 
-    public List<GameListItem> getGameList(GameListCursor cursor, int limit, String query) {
+    public List<Game> getGameList(GameListCursor cursor, int limit, String query) {
         List<GameEntity> games = gameRepository.findGamesWithCursorAndQuery(
                 cursor.cursorGameId(),
                 cursor.cursorPlayCount(),
@@ -25,13 +25,7 @@ public class GameReader {
                 query
         );
         return games.stream()
-                .map(gameEntity -> new GameListItem(
-                        gameEntity.getGameId(),
-                        gameEntity.getGameThumbnailUrl(),
-                        gameEntity.getGameTitle(),
-                        gameEntity.getQuestionCount(),
-                        gameEntity.getPlayCount(),
-                        gameEntity.getUpdatedAt()))
+                .map(Game::from)
                 .toList();
     }
 
@@ -39,6 +33,6 @@ public class GameReader {
         GameEntity gameEntity = gameRepository.findById(gameId)
                 .orElseThrow(() -> new IllegalArgumentException("Game not found with ID: " + gameId));
 
-        return Game.of(gameEntity);
+        return Game.from(gameEntity);
     }
 }

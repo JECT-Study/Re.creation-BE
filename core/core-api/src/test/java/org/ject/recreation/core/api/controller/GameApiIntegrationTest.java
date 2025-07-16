@@ -1,6 +1,5 @@
 package org.ject.recreation.core.api.controller;
 
-import org.ject.recreation.core.api.controller.response.GameListItemResponse;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
 import org.ject.recreation.core.support.response.ApiResponse;
 import org.ject.recreation.storage.db.core.GameEntity;
@@ -80,7 +79,7 @@ class GameApiIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         GameListResponseDto gameListResponse = (GameListResponseDto) response.getBody().getData();
-        List<GameListItemResponse> games = gameListResponse.games();
+        List<GameListResponseDto.GameDto> games = gameListResponse.games();
 
         assertThat(games.stream().anyMatch(game -> game.gameTitle().contains("비공유"))).isFalse();
         assertThat(games.stream().anyMatch(game -> game.gameTitle().contains("삭제"))).isFalse();
@@ -100,16 +99,16 @@ class GameApiIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         GameListResponseDto gameListResponse = (GameListResponseDto) response.getBody().getData();
-        List<GameListItemResponse> games = gameListResponse.games();
+        List<GameListResponseDto.GameDto> games = gameListResponse.games();
 
         AtomicBoolean isSorted = new AtomicBoolean(true);
 
         IntStream.range(0, games.size() - 1).forEach(i -> {
-            GameListItemResponse current = games.get(i);
-            GameListItemResponse next = games.get(i + 1);
+            GameListResponseDto.GameDto current = games.get(i);
+            GameListResponseDto.GameDto next = games.get(i + 1);
 
             if (current.playCount() > next.playCount()
-                    || current.updatedAt().compareTo(next.updatedAt()) > 0
+                    || current.updatedAt().isAfter(next.updatedAt())
                     || current.gameId().compareTo(next.gameId()) > 0) {
                 return;
             }
@@ -135,7 +134,7 @@ class GameApiIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         GameListResponseDto gameListResponse = (GameListResponseDto) response.getBody().getData();
-        List<GameListItemResponse> games = gameListResponse.games();
+        List<GameListResponseDto.GameDto> games = gameListResponse.games();
 
         assertThat(games).hasSize(limit);
     }
@@ -154,7 +153,7 @@ class GameApiIntegrationTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         GameListResponseDto gameListResponse = (GameListResponseDto) response.getBody().getData();
-        List<GameListItemResponse> games = gameListResponse.games();
+        List<GameListResponseDto.GameDto> games = gameListResponse.games();
 
         assertThat(games).isNotEmpty();
         assertThat(games).allMatch(game -> game.gameTitle().contains("영화"));
@@ -171,9 +170,9 @@ class GameApiIntegrationTest {
         );
 
         GameListResponseDto firstGameListResponse = (GameListResponseDto) firstResponse.getBody().getData();
-        List<GameListItemResponse> firstPageGames = firstGameListResponse.games();
+        List<GameListResponseDto.GameDto> firstPageGames = firstGameListResponse.games();
 
-        GameListItemResponse last = firstPageGames.getLast();
+        GameListResponseDto.GameDto last = firstPageGames.getLast();
 
         String url = String.format(
                 "/games?cursorPlayCount=%d&cursorUpdatedAt=%s&cursorGameId=%s&limit=%d",
@@ -190,7 +189,7 @@ class GameApiIntegrationTest {
         );
 
         GameListResponseDto secondGameListResponse = (GameListResponseDto) secondResponse.getBody().getData();
-        List<GameListItemResponse> secondPageGames = secondGameListResponse.games();
+        List<GameListResponseDto.GameDto> secondPageGames = secondGameListResponse.games();
 
         assertThat(secondPageGames).doesNotContainAnyElementsOf(firstPageGames);
     }

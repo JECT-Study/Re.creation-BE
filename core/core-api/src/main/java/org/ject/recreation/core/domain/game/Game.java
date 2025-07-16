@@ -24,7 +24,7 @@ public record Game(
         LocalDateTime updatedAt,
         LocalDateTime deletedAt
 ) {
-    public static Game of(GameEntity game) {
+    public static Game from(GameEntity game) {
         return new Game(
                 game.getGameId(),
                 game.getGameCreatorEmail(),

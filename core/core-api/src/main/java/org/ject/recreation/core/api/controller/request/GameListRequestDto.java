@@ -8,7 +8,7 @@ import java.util.UUID;
 public record GameListRequestDto(
         UUID cursorGameId,
         Long cursorPlayCount,
-        String cursorUpdatedAt,
+        LocalDateTime cursorUpdatedAt,
         int limit,
         String query
 ) {
@@ -16,7 +16,7 @@ public record GameListRequestDto(
         return new GameListQuery(
                 cursorGameId,
                 cursorPlayCount,
-                cursorUpdatedAt != null ? LocalDateTime.parse(cursorUpdatedAt) : null,
+                cursorUpdatedAt,
                 limit,
                 query
         );

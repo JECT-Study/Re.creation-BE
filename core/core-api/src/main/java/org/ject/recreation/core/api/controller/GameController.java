@@ -2,7 +2,6 @@ package org.ject.recreation.core.api.controller;
 
 import org.ject.recreation.core.api.controller.request.GameListRequestDto;
 import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
-import org.ject.recreation.core.api.controller.response.GameListItemResponse;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
 import org.ject.recreation.core.domain.game.GameDetailResult;
 import org.ject.recreation.core.domain.game.GameListResult;
@@ -27,13 +26,13 @@ public class GameController {
         GameListResult gameListResult = gameService.getGameList(request.toGameListQuery());
         return ApiResponse.success(new GameListResponseDto(
                 gameListResult.games().stream()
-                        .map(game -> new GameListItemResponse(
+                        .map(game -> new GameListResponseDto.GameDto(
                                 game.gameId(),
                                 game.gameThumbnail(),
                                 game.gameTitle(),
                                 game.questionCount(),
                                 game.playCount(),
-                                game.updatedAt().toString()
+                                game.updatedAt()
                         ))
                         .toList()
         ));

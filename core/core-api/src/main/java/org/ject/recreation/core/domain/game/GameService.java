@@ -21,12 +21,20 @@ public class GameService {
     }
 
     public GameListResult getGameList(GameListQuery gameListQuery) {
-        List<GameListItem> gameListItems = gameReader.getGameList(
+        List<Game> games = gameReader.getGameList(
                 gameListQuery.toGameListCursor(),
                 gameListQuery.limit(),
                 gameListQuery.query());
 
-        return new GameListResult(gameListItems);
+        return new GameListResult(games.stream()
+                .map(game -> new GameResult(
+                        game.gameId(),
+                        game.gameThumbnailUrl(),
+                        game.gameTitle(),
+                        game.questionCount(),
+                        game.playCount(),
+                        game.updatedAt()))
+                .toList());
     }
 
     public GameDetailResult getGameDetail(UUID gameId) {
