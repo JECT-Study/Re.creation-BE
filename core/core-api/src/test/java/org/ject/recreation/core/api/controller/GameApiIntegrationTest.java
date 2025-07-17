@@ -1,9 +1,15 @@
 package org.ject.recreation.core.api.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
+import org.ject.recreation.core.support.error.ErrorMessage;
 import org.ject.recreation.core.support.response.ApiResponse;
 import org.ject.recreation.storage.db.core.GameEntity;
 import org.ject.recreation.storage.db.core.GameRepository;
+import org.ject.recreation.storage.db.core.QuestionEntity;
+import org.ject.recreation.storage.db.core.QuestionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -34,6 +40,9 @@ class GameApiIntegrationTest {
     @Autowired
     private GameRepository gameRepository;
 
+    @Autowired
+    private QuestionRepository questionRepository;
+
     private final List<GameEntity> games = List.of(
             createGame("가장 인기 퀴즈", 400,true, false),
             createGame("OX 퀴즈", 310, true, false),
@@ -57,12 +66,23 @@ class GameApiIntegrationTest {
             createGame("랜덤 퀴즈", 50, true, false)
     );
 
+    private final List<QuestionEntity> questions = List.of(
+            createQuestion(games.getFirst().getGameId(), 1, "가장 인기 퀴즈 질문 1", "답변 1"),
+            createQuestion(games.getFirst().getGameId(), 2, "가장 인기 퀴즈 질문 2", "답변 2"),
+            createQuestion(games.getFirst().getGameId(), 3, "가장 인기 퀴즈 질문 3", "답변 3"),
+            createQuestion(games.getFirst().getGameId(), 4, "가장 인기 퀴즈 질문 4", "답변 4"),
+            createQuestion(games.getFirst().getGameId(), 5, "가장 인기 퀴즈 질문 5", "답변 5"),
+            createQuestion(games.getFirst().getGameId(), 6, "가장 인기 퀴즈 질문 6", "답변 6")
+    );
+
     @BeforeEach
     void setUp() {
         gameRepository.deleteAll();
+        questionRepository.deleteAll();
 
         // 테스트용 데이터 삽입
         gameRepository.saveAll(games);
+        questionRepository.saveAll(questions);
     }
 
     @Test
@@ -194,6 +214,57 @@ class GameApiIntegrationTest {
         assertThat(secondPageGames).doesNotContainAnyElementsOf(firstPageGames);
     }
 
+    @Test
+    void 게임_정보_상세_조회_시_문제들은_순서대로_정렬되어_반환된다() {
+        UUID gameId = games.getFirst().getGameId();
+
+        // when
+        ResponseEntity<ApiResponse<GameDetailResponseDto>> response = restTemplate.exchange(
+                "/games/" + gameId,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {}
+        );
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        GameDetailResponseDto gameDetailResponse = (GameDetailResponseDto) response.getBody().getData();
+        List<GameDetailResponseDto.QuestionDto> questions = gameDetailResponse.questions();
+
+        assertThat(questions).isNotEmpty();
+
+        AtomicBoolean isSorted = new AtomicBoolean(true);
+
+        IntStream.range(0, questions.size() - 1).forEach(i -> {
+            GameDetailResponseDto.QuestionDto current = questions.get(i);
+            GameDetailResponseDto.QuestionDto next = questions.get(i + 1);
+
+            if (current.questionOrder() >= next.questionOrder()) {
+                isSorted.set(false);
+            }
+        });
+
+        assertThat(isSorted.get()).isTrue();
+    }
+
+    @Test
+    void 없는_게임_정보를_상세_조회_시_404가_발생한다() throws Exception {
+        UUID gameId = UUID.randomUUID();
+
+        // when
+        ResponseEntity<?> response = restTemplate.exchange(
+                "/games/" + gameId,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<>() {}
+        );
+
+        System.out.println("Response: " + response.getBody());
+
+        // then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
 
     private GameEntity createGame(String title, long playCount, boolean isShared, boolean isDeleted) {
         GameEntity game = new GameEntity();
@@ -204,9 +275,18 @@ class GameApiIntegrationTest {
         game.setPlayCount(playCount);
         game.setShared(isShared);
         game.setDeleted(isDeleted);
-        game.setQuestionCount(10);
-        game.setVersion(1);
+        game.setQuestionCount(6);
         return game;
+    }
+
+    private QuestionEntity createQuestion(UUID gameId, int questionOrder, String questionText, String questionAnswer) {
+        QuestionEntity question = new QuestionEntity();
+        question.setGameId(gameId);
+        question.setQuestionOrder(questionOrder);
+        question.setImageUrl("http://image.url/question");
+        question.setQuestionText(questionText);
+        question.setQuestionAnswer(questionAnswer);
+        return question;
     }
 }
 
