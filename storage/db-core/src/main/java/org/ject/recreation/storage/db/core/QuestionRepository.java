@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface QuestionRepository extends JpaRepository<QuestionEntity, Long> {
-    List<QuestionEntity> findByGameId(UUID gameId);
+    List<QuestionEntity> findByGameIdOrderByQuestionOrder(UUID gameId);
 }

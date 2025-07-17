@@ -1,5 +1,6 @@
 package org.ject.recreation.core.domain.game;
 
+import org.ject.recreation.core.support.error.CoreException;
 import org.ject.recreation.storage.db.core.GameEntity;
 import org.ject.recreation.storage.db.core.GameRepository;
 import org.springframework.data.domain.PageRequest;
@@ -7,6 +8,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.UUID;
+
+import static org.ject.recreation.core.support.error.ErrorType.GAME_NOT_FOUND;
 
 @Component
 public class GameReader {
@@ -31,7 +34,7 @@ public class GameReader {
 
     public Game getGameByGameId(UUID gameId) {
         GameEntity gameEntity = gameRepository.findById(gameId)
-                .orElseThrow(() -> new IllegalArgumentException("Game not found with ID: " + gameId));
+                .orElseThrow(() -> new CoreException(GAME_NOT_FOUND, gameId));
 
         return Game.from(gameEntity);
     }

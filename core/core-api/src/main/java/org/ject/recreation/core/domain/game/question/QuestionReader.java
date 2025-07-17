@@ -16,7 +16,7 @@ public class QuestionReader {
     }
 
     public List<Question> getQuestionsByGameId(UUID gameId) {
-        List<QuestionEntity> questions = questionRepository.findByGameId(gameId);
+        List<QuestionEntity> questions = questionRepository.findByGameIdOrderByQuestionOrder(gameId);
         return questions.stream()
                 .map(Question::from)
                 .toList();
