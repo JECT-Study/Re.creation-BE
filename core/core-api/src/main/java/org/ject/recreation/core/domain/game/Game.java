@@ -5,14 +5,9 @@ import org.ject.recreation.storage.db.core.GameEntity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/**
- * 게임 정보를 담는 클래스
- *
- * <p> Implement Layer 에서 사용됩니다
- */
 public record Game(
         UUID gameId,
-        String gameCreatorEmail,
+        String nickname,
         String gameTitle,
         String gameThumbnailUrl,
         boolean isShared,
@@ -27,7 +22,7 @@ public record Game(
     public static Game from(GameEntity game) {
         return new Game(
                 game.getGameId(),
-                game.getGameCreatorEmail(),
+                game.getGameCreator().getNickname(),
                 game.getGameTitle(),
                 game.getGameThumbnailUrl(),
                 game.isShared(),

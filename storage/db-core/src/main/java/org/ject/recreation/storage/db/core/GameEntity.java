@@ -14,8 +14,14 @@ public class GameEntity extends BaseEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID gameId;
 
-    @Column(nullable = false, length = 255)
-    private String gameCreatorEmail;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "game_creator_email",
+            referencedColumnName = "email",
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            nullable = false
+    )
+    private UserEntity gameCreator;
 
     @Column(nullable = false, length = 200)
     private String gameTitle;

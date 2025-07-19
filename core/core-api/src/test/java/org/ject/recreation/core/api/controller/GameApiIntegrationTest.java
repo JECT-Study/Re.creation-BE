@@ -1,15 +1,9 @@
 package org.ject.recreation.core.api.controller;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
-import org.ject.recreation.core.support.error.ErrorMessage;
 import org.ject.recreation.core.support.response.ApiResponse;
-import org.ject.recreation.storage.db.core.GameEntity;
-import org.ject.recreation.storage.db.core.GameRepository;
-import org.ject.recreation.storage.db.core.QuestionEntity;
-import org.ject.recreation.storage.db.core.QuestionRepository;
+import org.ject.recreation.storage.db.core.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,8 +15,10 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,45 +39,66 @@ class GameApiIntegrationTest {
     @Autowired
     private QuestionRepository questionRepository;
 
-    private final List<GameEntity> games = List.of(
-            createGame("가장 인기 퀴즈", 400,true, false),
-            createGame("OX 퀴즈", 310, true, false),
-            createGame("O/X 퀴즈", 300, true, false),
-            createGame("인물 퀴즈 2", 250, true, false),
-            createGame("최근 업데이트 퀴즈", 210, true, false),
-            createGame("영화 명대사 퀴즈  1", 200, true, false),
-            createGame("영화 명대사 퀴즈  2 (비공유)", 200, false, false),
-            createGame("연상 퀴즈", 180, true, false),
-            createGame("지구과학 퀴즈 1 (삭제)", 150, true, true),
-            createGame("지구과학 퀴즈 2 (삭제)", 150, true, true),
-            createGame("한국사 퀴즈", 120, true, false),
-            createGame("지구과학 퀴즈 3 (비공유)", 110, false, false),
-            createGame("인물 퀴즈 1 (삭제)", 100, true, true),
-            createGame("인물 퀴즈 2 (비공유 삭제)", 95, false, true),
-            createGame("수학 퀴즈", 90, true, false),
-            createGame("세계사 퀴즈", 80,  true, false),
-            createGame("영어 퀴즈", 70, true, false),
-            createGame("과학 퀴즈", 60, true, false),
-            createGame("영화 명대사 퀴즈 3", 50, true, false),
-            createGame("랜덤 퀴즈", 50, true, false)
-    );
+    @Autowired
+    private UserRepository userRepository;
 
-    private final List<QuestionEntity> questions = List.of(
-            createQuestion(games.getFirst().getGameId(), 1, "가장 인기 퀴즈 질문 1", "답변 1"),
-            createQuestion(games.getFirst().getGameId(), 2, "가장 인기 퀴즈 질문 2", "답변 2"),
-            createQuestion(games.getFirst().getGameId(), 3, "가장 인기 퀴즈 질문 3", "답변 3"),
-            createQuestion(games.getFirst().getGameId(), 4, "가장 인기 퀴즈 질문 4", "답변 4"),
-            createQuestion(games.getFirst().getGameId(), 5, "가장 인기 퀴즈 질문 5", "답변 5"),
-            createQuestion(games.getFirst().getGameId(), 6, "가장 인기 퀴즈 질문 6", "답변 6")
-    );
+    private UserEntity user;
+
+    private List<GameEntity> games;
+
+    private List<QuestionEntity> questions;
 
     @BeforeEach
     void setUp() {
+        userRepository.deleteAll();
         gameRepository.deleteAll();
         questionRepository.deleteAll();
 
-        // 테스트용 데이터 삽입
+        user = new UserEntity(
+                "test@example.com",
+                "kakao",
+                "http://image.url/question",
+                "테스트유저",
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+        userRepository.save(user);
+
+        System.out.println("찾자");
+        System.out.println("saved user: " + userRepository.findAll());
+
+        games = List.of(
+                createGame("가장 인기 퀴즈", user, 400,true, false),
+                createGame("OX 퀴즈", user, 310, true, false),
+                createGame("O/X 퀴즈", user, 300, true, false),
+                createGame("인물 퀴즈 2", user, 250, true, false),
+                createGame("최근 업데이트 퀴즈", user, 210, true, false),
+                createGame("영화 명대사 퀴즈  1", user, 200, true, false),
+                createGame("영화 명대사 퀴즈  2 (비공유)", user, 200, false, false),
+                createGame("연상 퀴즈", user, 180, true, false),
+                createGame("지구과학 퀴즈 1 (삭제)", user, 150, true, true),
+                createGame("지구과학 퀴즈 2 (삭제)", user, 150, true, true),
+                createGame("한국사 퀴즈", user, 120, true, false),
+                createGame("지구과학 퀴즈 3 (비공유)", user, 110, false, false),
+                createGame("인물 퀴즈 1 (삭제)", user, 100, true, true),
+                createGame("인물 퀴즈 2 (비공유 삭제)", user, 95, false, true),
+                createGame("수학 퀴즈", user, 90, true, false),
+                createGame("세계사 퀴즈", user, 80,  true, false),
+                createGame("영어 퀴즈", user, 70, true, false),
+                createGame("과학 퀴즈", user, 60, true, false),
+                createGame("영화 명대사 퀴즈 3", user, 50, true, false),
+                createGame("랜덤 퀴즈", user, 50, true, false)
+        );
         gameRepository.saveAll(games);
+
+        questions = List.of(
+                createQuestion(games.getFirst().getGameId(), 1, "가장 인기 퀴즈 질문 1", "답변 1"),
+                createQuestion(games.getFirst().getGameId(), 2, "가장 인기 퀴즈 질문 2", "답변 2"),
+                createQuestion(games.getFirst().getGameId(), 3, "가장 인기 퀴즈 질문 3", "답변 3"),
+                createQuestion(games.getFirst().getGameId(), 4, "가장 인기 퀴즈 질문 4", "답변 4"),
+                createQuestion(games.getFirst().getGameId(), 5, "가장 인기 퀴즈 질문 5", "답변 5"),
+                createQuestion(games.getFirst().getGameId(), 6, "가장 인기 퀴즈 질문 6", "답변 6")
+        );
         questionRepository.saveAll(questions);
     }
 
@@ -260,18 +277,17 @@ class GameApiIntegrationTest {
                 new ParameterizedTypeReference<>() {}
         );
 
-        System.out.println("Response: " + response.getBody());
-
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
 
-    private GameEntity createGame(String title, long playCount, boolean isShared, boolean isDeleted) {
+    private GameEntity createGame(String title, UserEntity user, long playCount, boolean isShared, boolean isDeleted) {
         GameEntity game = new GameEntity();
+
         game.setGameId(UUID.randomUUID());
         game.setGameTitle(title);
         game.setGameThumbnailUrl("http://thumbnail.url/" + title);
-        game.setGameCreatorEmail("test@example.com");
+        game.setGameCreator(user);
         game.setPlayCount(playCount);
         game.setShared(isShared);
         game.setDeleted(isDeleted);

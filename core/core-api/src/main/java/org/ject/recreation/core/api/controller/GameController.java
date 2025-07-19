@@ -24,6 +24,7 @@ public class GameController {
     @GetMapping
     public ApiResponse<GameListResponseDto> getGameList(@ModelAttribute GameListRequestDto request) {
         GameListResult gameListResult = gameService.getGameList(request.toGameListQuery());
+
         return ApiResponse.success(new GameListResponseDto(
                 gameListResult.games().stream()
                         .map(game -> new GameListResponseDto.GameDto(

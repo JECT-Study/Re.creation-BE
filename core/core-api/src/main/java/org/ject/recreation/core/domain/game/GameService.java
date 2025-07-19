@@ -4,6 +4,7 @@ import org.ject.recreation.core.domain.game.question.Question;
 import org.ject.recreation.core.domain.game.question.QuestionReader;
 import org.ject.recreation.core.domain.game.question.QuestionResult;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +21,7 @@ public class GameService {
         this.questionReader = questionReader;
     }
 
+    @Transactional(readOnly = true)
     public GameListResult getGameList(GameListQuery gameListQuery) {
         List<Game> games = gameReader.getGameList(
                 gameListQuery.toGameListCursor(),
@@ -37,16 +39,14 @@ public class GameService {
                 .toList());
     }
 
+    @Transactional(readOnly = true)
     public GameDetailResult getGameDetail(UUID gameId) {
         Game game = gameReader.getGameByGameId(gameId);
         List<Question> questions = questionReader.getQuestionsByGameId(gameId);
 
-        String gameCreatorEmail = game.gameCreatorEmail();
-        String gameCreatorNickname = "test_nickname"; // TODO: 실제 닉네임을 사용자 정보로부터 가져와야 함
-
         return new GameDetailResult(
                 game.gameTitle(),
-                gameCreatorNickname,
+                game.nickname(),
                 game.questionCount(),
                 game.version(),
                 questions.stream()
