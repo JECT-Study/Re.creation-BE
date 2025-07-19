@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = "`user`")
 @Getter
-public class User {
+public class UserEntity {
     @Id
     @Column(nullable = false, length = 255)
     private String email;
