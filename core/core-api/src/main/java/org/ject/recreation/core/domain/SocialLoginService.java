@@ -3,7 +3,7 @@ package org.ject.recreation.core.domain;
 import lombok.RequiredArgsConstructor;
 import org.ject.recreation.core.api.controller.request.SocialLoginRequestDto;
 import org.ject.recreation.core.api.controller.response.SocialLoginResponseDto;
-import org.ject.recreation.storage.db.core.User;
+import org.ject.recreation.storage.db.core.UserEntity;
 import org.ject.recreation.storage.db.core.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -31,8 +31,8 @@ public class SocialLoginService {
     public SocialLoginResponseDto loginWithKakao(SocialLoginRequestDto request) {
         String accessToken = getKakaoAccessToken(request.getCode());
         Map<String, String> userInfo = getKakaoUserInfo(accessToken);
-        User user = saveOrUpdateUser(userInfo);
-        return createResponse(user);
+        UserEntity userEntity = saveOrUpdateUser(userInfo);
+        return createResponse(userEntity);
     }
 
     private String getKakaoAccessToken(String code) {
@@ -76,21 +76,21 @@ public class SocialLoginService {
         return userInfo;
     }
 
-    private User saveOrUpdateUser(Map<String, String> userInfo) {
+    private UserEntity saveOrUpdateUser(Map<String, String> userInfo) {
         String email = userInfo.get("email");
         String nickname = userInfo.get("nickname");
         String profileImageUrl = userInfo.get("profileImageUrl");
 
-        User user = userRepository.findById(email).orElse(
-            new User(email, "kakao", profileImageUrl, nickname, LocalDateTime.now(), LocalDateTime.now())
+        UserEntity userEntity = userRepository.findById(email).orElse(
+            new UserEntity(email, "kakao", profileImageUrl, nickname, LocalDateTime.now(), LocalDateTime.now())
         );
-        return userRepository.save(user);
+        return userRepository.save(userEntity);
     }
 
-    private SocialLoginResponseDto createResponse(User user) {
+    private SocialLoginResponseDto createResponse(UserEntity userEntity) {
         return SocialLoginResponseDto.builder()
-            .email(user.getEmail())
-            .nickname(user.getNickname())
-            .profileImageUrl(user.getProfileImageUrl()).build();
+            .email(userEntity.getEmail())
+            .nickname(userEntity.getNickname())
+            .profileImageUrl(userEntity.getProfileImageUrl()).build();
     }
 } 
