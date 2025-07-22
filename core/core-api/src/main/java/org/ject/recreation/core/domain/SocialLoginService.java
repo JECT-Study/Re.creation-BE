@@ -82,7 +82,7 @@ public class SocialLoginService {
         String profileImageUrl = userInfo.get("profileImageUrl");
 
         User user = userRepository.findById(email).orElse(
-            new User(email, "kakao", profileImageUrl, nickname, LocalDateTime.now(), LocalDateTime.now())
+            new User(email, "kakao", profileImageUrl, nickname, LocalDateTime.now(), LocalDateTime.now(),null)
         );
         return userRepository.save(user);
     }

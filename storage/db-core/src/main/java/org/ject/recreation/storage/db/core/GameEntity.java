@@ -1,14 +1,22 @@
 package org.ject.recreation.storage.db.core;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
 @Table(name="game")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class GameEntity extends BaseEntity {
     @Id
     @Column(columnDefinition = "BINARY(16)")
@@ -24,21 +32,50 @@ public class GameEntity extends BaseEntity {
     private String gameThumbnailUrl;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isShared = false;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean isDeleted = false;
 
     @Column(nullable = false)
+    @Builder.Default
     private int questionCount = 0;
 
     @Column(nullable = false)
+    @Builder.Default
     private long playCount = 0;
 
     @Version
     @Column(nullable = false)
+    @Builder.Default
     private long version = 1;
 
     @Column(nullable = true)
     private LocalDateTime deletedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "email", nullable = false)
+    private User user;
+
+    // 1:N 관계 - 게임에 포함된 문제들
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<QuestionEntity> questions = new ArrayList<>();
+
+    public GameEntity update(GameEntity gameEntity) {
+        this.gameTitle = gameEntity.gameTitle;
+        this.gameThumbnailUrl = gameEntity.gameThumbnailUrl;
+        this.questionCount = gameEntity.questionCount;
+        this.playCount = gameEntity.playCount;
+        this.version = gameEntity.version;
+        this.deletedAt = gameEntity.deletedAt;
+        this.user = gameEntity.user;
+        return this;
+    }
+
+    public void plusCount(){
+        this.playCount += 1;
+    }
 }

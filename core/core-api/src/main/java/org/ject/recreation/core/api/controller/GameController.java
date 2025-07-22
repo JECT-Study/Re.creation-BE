@@ -1,8 +1,11 @@
 package org.ject.recreation.core.api.controller;
 
+import org.ject.recreation.core.api.controller.request.CreateGameRequest;
 import org.ject.recreation.core.api.controller.request.GameListRequestDto;
 import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
+import org.ject.recreation.core.api.controller.session.SessionUserInfo;
+import org.ject.recreation.core.api.controller.session.SessionUserInfoDto;
 import org.ject.recreation.core.domain.game.GameDetailResult;
 import org.ject.recreation.core.domain.game.GameListResult;
 import org.ject.recreation.core.domain.game.GameService;
@@ -58,6 +61,24 @@ public class GameController {
                         .toList()
         ));
 
+    }
+
+    @PostMapping
+    public ApiResponse<String> createGame(@SessionUserInfo SessionUserInfoDto userInfo,
+                                     @RequestBody CreateGameRequest createGameRequest) {
+        return ApiResponse.success(gameService.createGame(userInfo, createGameRequest));
+    }
+
+    @PostMapping("/{gameId}/plays")
+    public ApiResponse<String> playGame(@PathVariable UUID gameId){
+        return ApiResponse.success(gameService.playGame(gameId));
+    }
+
+    @PutMapping("/games/{gameId}")
+    public ApiResponse<String> updateGame(@SessionUserInfo SessionUserInfoDto userInfo,
+                                 @PathVariable UUID gameId,
+                                 @RequestBody CreateGameRequest createGameRequest) {
+        return ApiResponse.success(gameService.updateGame(userInfo, gameId, createGameRequest));
     }
 
 }

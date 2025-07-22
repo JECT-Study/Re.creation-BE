@@ -6,11 +6,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Table(name = "`user`")
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "`user`")
 @Getter
 public class User {
     @Id
@@ -31,4 +33,7 @@ public class User {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<GameEntity> games = new ArrayList<>();
 } 

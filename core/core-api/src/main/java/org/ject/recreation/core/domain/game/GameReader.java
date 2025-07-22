@@ -1,5 +1,6 @@
 package org.ject.recreation.core.domain.game;
 
+import org.ject.recreation.core.api.controller.request.CreateGameRequest;
 import org.ject.recreation.core.support.error.CoreException;
 import org.ject.recreation.core.support.error.ErrorData;
 import org.ject.recreation.storage.db.core.GameEntity;
@@ -40,4 +41,14 @@ public class GameReader {
 
         return Game.from(gameEntity);
     }
+
+//    public Game updateGame(CreateGameRequest createGameRequest){
+//        GameEntity gameEntity = gameRepository.findById(createGameRequest.getGameId())
+//                .orElseThrow(() -> new CoreException(GAME_NOT_FOUND,
+//                        ErrorData.of("gameId", createGameRequest.getGameId())));
+//
+//        gameEntity.updateGame(createGameRequest);
+//
+//        return Game.from(gameEntity);
+//    }
 }

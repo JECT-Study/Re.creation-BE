@@ -1,5 +1,6 @@
 package org.ject.recreation.core.domain.game;
 
+import org.ject.recreation.core.api.controller.request.CreateGameRequest;
 import org.ject.recreation.storage.db.core.GameEntity;
 
 import java.time.LocalDateTime;
