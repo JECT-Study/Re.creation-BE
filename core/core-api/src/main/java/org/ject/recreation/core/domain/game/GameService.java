@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -138,7 +139,7 @@ public class GameService {
                         .questionAnswer(questionRequest.getQuestionAnswer())
                         .imageUrl(questionRequest.getImageUrl())
                         .build())
-                .toList();
+                .collect(Collectors.toList()); // 가변 리스트
 
         // 기존 게임 엔티티 정보 업데이트
         existingGame.setGameTitle(createGameRequest.getGameTitle());

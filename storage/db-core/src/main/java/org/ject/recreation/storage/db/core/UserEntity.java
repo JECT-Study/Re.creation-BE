@@ -2,6 +2,7 @@ package org.ject.recreation.storage.db.core;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -14,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
+@Builder
 public class UserEntity {
     @Id
     @Column(nullable = false, length = 255)
