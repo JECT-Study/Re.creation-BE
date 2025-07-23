@@ -33,14 +33,4 @@ public class CreateGameRequest {
         private String questionText;
         private String questionAnswer;
     }
-
-    public GameEntity toGameEntity() {
-        final GameEntity gameEntity = new GameEntity();
-        gameEntity.setGameId(gameId);
-        gameEntity.setGameTitle(gameTitle);
-        gameEntity.setGameCreatorEmail(gameCreatorEmail);
-        gameEntity.setGameThumbnailUrl(gameThumbnailUrl);
-        gameEntity.setQuestionCount(questions.size());
-        return gameEntity;
-    }
 }

@@ -8,12 +8,7 @@ import org.ject.recreation.core.domain.game.question.QuestionReader;
 import org.ject.recreation.core.domain.game.question.QuestionResult;
 import org.ject.recreation.core.support.error.CoreException;
 import org.ject.recreation.core.support.error.ErrorType;
-import org.ject.recreation.storage.db.core.GameEntity;
-import org.ject.recreation.storage.db.core.GameRepository;
-import org.ject.recreation.storage.db.core.QuestionEntity;
-import org.ject.recreation.storage.db.core.QuestionRepository;
-import org.ject.recreation.storage.db.core.User;
-import org.ject.recreation.storage.db.core.UserRepository;
+import org.ject.recreation.storage.db.core.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,6 +26,7 @@ public class GameService {
     private final GameRepository gameRepository;
     private final QuestionRepository questionRepository;
 
+    @Transactional(readOnly = true)
     public GameListResult getGameList(GameListQuery gameListQuery) {
         List<Game> games = gameReader.getGameList(
                 gameListQuery.toGameListCursor(),
@@ -48,16 +44,14 @@ public class GameService {
                 .toList());
     }
 
+    @Transactional(readOnly = true)
     public GameDetailResult getGameDetail(UUID gameId) {
         Game game = gameReader.getGameByGameId(gameId);
         List<Question> questions = questionReader.getQuestionsByGameId(gameId);
 
-        String gameCreatorEmail = game.gameCreatorEmail();
-        String gameCreatorNickname = "test_nickname"; // TODO: 실제 닉네임을 사용자 정보로부터 가져와야 함
-
         return new GameDetailResult(
                 game.gameTitle(),
-                gameCreatorNickname,
+                game.nickname(),
                 game.questionCount(),
                 game.version(),
                 questions.stream()
@@ -76,7 +70,7 @@ public class GameService {
     public String createGame(SessionUserInfoDto userInfo,
                              CreateGameRequest createGameRequest){
         // 사용자 정보 조회
-        User user = userRepository.findById(userInfo.getEmail())
+        UserEntity user = userRepository.findById(userInfo.getEmail())
                 .orElseThrow(()-> new CoreException(ErrorType.UNAUTHORIZED));
         
         // 기존 게임 엔티티 조회
@@ -101,7 +95,7 @@ public class GameService {
         GameEntity updatedGame = GameEntity.builder()
                 .gameId(createGameRequest.getGameId())
                 .gameTitle(createGameRequest.getGameTitle())
-                .gameCreatorEmail(createGameRequest.getGameCreatorEmail())
+                .gameCreator(user)
                 .gameThumbnailUrl(createGameRequest.getGameThumbnailUrl())
                 .questionCount(createGameRequest.getQuestions().size())
                 .playCount(existingGame.getPlayCount())
@@ -109,7 +103,6 @@ public class GameService {
                 .isDeleted(existingGame.isDeleted())
                 .version(existingGame.getVersion())
                 .deletedAt(existingGame.getDeletedAt())
-                .user(user)
                 .questions(questionEntities)
                 .build();
         
@@ -126,7 +119,7 @@ public class GameService {
     @Transactional
     public String updateGame(SessionUserInfoDto userInfo, UUID gameId, CreateGameRequest createGameRequest) {
         // 사용자 정보 조회
-        User user = userRepository.findById(userInfo.getEmail())
+        UserEntity user = userRepository.findById(userInfo.getEmail())
                 .orElseThrow(() -> new CoreException(ErrorType.UNAUTHORIZED));
 
         // 기존 게임 엔티티 조회
@@ -151,7 +144,7 @@ public class GameService {
         existingGame.setGameTitle(createGameRequest.getGameTitle());
         existingGame.setGameThumbnailUrl(createGameRequest.getGameThumbnailUrl());
         existingGame.setQuestionCount(createGameRequest.getQuestions().size());
-        existingGame.setUser(user);
+        existingGame.setGameCreator(user);
         existingGame.setQuestions(questionEntities);
 
         // 질문들에 게임 참조 설정

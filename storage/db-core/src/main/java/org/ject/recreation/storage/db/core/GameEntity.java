@@ -22,8 +22,14 @@ public class GameEntity extends BaseEntity {
     @Column(columnDefinition = "BINARY(16)")
     private UUID gameId;
 
-    @Column(nullable = false, length = 255)
-    private String gameCreatorEmail;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "game_creator_email",
+            referencedColumnName = "email",
+            foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT),
+            nullable = false
+    )
+    private UserEntity gameCreator;
 
     @Column(nullable = false, length = 200)
     private String gameTitle;
@@ -55,10 +61,6 @@ public class GameEntity extends BaseEntity {
     @Column(nullable = true)
     private LocalDateTime deletedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "email", nullable = false)
-    private User user;
-
     // 1:N 관계 - 게임에 포함된 문제들
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
@@ -71,7 +73,7 @@ public class GameEntity extends BaseEntity {
         this.playCount = gameEntity.playCount;
         this.version = gameEntity.version;
         this.deletedAt = gameEntity.deletedAt;
-        this.user = gameEntity.user;
+        this.gameCreator = gameEntity.gameCreator;
         return this;
     }
 

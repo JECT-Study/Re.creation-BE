@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
-public class User {
+public class UserEntity {
     @Id
     @Column(nullable = false, length = 255)
     private String email;
@@ -34,6 +34,6 @@ public class User {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<GameEntity> games = new ArrayList<>();
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    private List<GameEntity> games = new ArrayList<>();
 } 

@@ -6,4 +6,5 @@ spring:
     import:
       - db-core.yml
       - logging.yml
+      - secret.yml
   web.resources.add-mappings: false
