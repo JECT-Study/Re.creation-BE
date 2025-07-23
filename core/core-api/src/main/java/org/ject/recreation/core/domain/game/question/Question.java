@@ -19,7 +19,7 @@ public record Question(
     public static Question from(QuestionEntity question) {
         return new Question(
                 question.getQuestionId(),
-                question.getGameId(),
+                question.getGame().getGameId(),
                 question.getQuestionOrder(),
                 question.getQuestionText(),
                 question.getQuestionAnswer(),

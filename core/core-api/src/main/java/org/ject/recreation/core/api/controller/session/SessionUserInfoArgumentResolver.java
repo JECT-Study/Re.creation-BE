@@ -9,11 +9,11 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 @Component
-public class SessionUserEmailArgumentResolver implements HandlerMethodArgumentResolver {
+public class SessionUserInfoArgumentResolver implements HandlerMethodArgumentResolver {
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(SessionUserEmail.class)
-                && parameter.getParameterType().equals(String.class);
+        return parameter.hasParameterAnnotation(SessionUserInfo.class)
+                && parameter.getParameterType().equals(SessionUserInfoDto.class);
     }
 
     @Override
@@ -23,6 +23,6 @@ public class SessionUserEmailArgumentResolver implements HandlerMethodArgumentRe
         if (request == null) return null;
         HttpSession session = request.getSession(false);
         if (session == null) return null;
-        return session.getAttribute("userEmail");
+        return session.getAttribute("userInfo");
     }
 } 

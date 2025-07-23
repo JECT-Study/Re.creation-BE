@@ -11,11 +11,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import org.ject.recreation.core.api.controller.session.SessionUserInfo;
+import org.ject.recreation.core.api.controller.session.SessionUserInfoDto;
+import org.ject.recreation.storage.db.core.UserRepository;
 
 @RestController
 @RequiredArgsConstructor
 public class SocialLoginController {
     private final SocialLoginService socialLoginService;
+    private final UserRepository userRepository;
 
     @Value("${kakao.client-id}")
     private String kakaoClientId;
@@ -27,12 +31,16 @@ public class SocialLoginController {
     public ApiResponse<SocialLoginResponseDto> login(@RequestBody SocialLoginRequestDto request, HttpSession session) {
         SocialLoginResponseDto response = socialLoginService.loginWithKakao(request);
         if (response.getEmail() != null) {
-            session.setAttribute("userEmail", response.getEmail());
+            SessionUserInfoDto userInfo = SessionUserInfoDto.builder()
+                .email(response.getEmail())
+                .nickname(response.getNickname())
+                .profileImageUrl(response.getProfileImageUrl())
+                .build();
+            session.setAttribute("userInfo", userInfo);
         }
         return ApiResponse.success(response);
     }
 
-    // 로그인 테스트 api
     @GetMapping("/login/kakao/test")
     public void redirectToKakaoLogin(HttpServletResponse response) throws IOException {
         String url = "https://kauth.kakao.com/oauth/authorize"
