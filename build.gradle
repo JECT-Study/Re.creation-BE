@@ -19,6 +19,12 @@ subprojects {
 	apply plugin: 'org.springframework.boot'
 	apply plugin: 'io.spring.dependency-management'
 
+	dependencyManagement {
+		imports {
+			mavenBom "io.awspring.cloud:spring-cloud-aws-dependencies:${springCloudAwsDependenciesVersion}"
+		}
+	}
+
 	java {
 		toolchain {
 			languageVersion = JavaLanguageVersion.of(project.javaVersion as int)
