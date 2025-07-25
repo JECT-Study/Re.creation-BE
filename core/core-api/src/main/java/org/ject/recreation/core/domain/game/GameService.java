@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 @Service
@@ -72,10 +71,17 @@ public class GameService {
     }
 
     public PresignedUrlListResult getPresignedUrls(PresignedUrlQuery presignedUrlQuery) {
-        return getPresignedUrls(UUID.randomUUID(), presignedUrlQuery);
+        return generatePresignedUrls(UUID.randomUUID(), presignedUrlQuery);
     }
 
     public PresignedUrlListResult getPresignedUrls(UUID gameId, PresignedUrlQuery presignedUrlQuery) {
+        Game game = gameReader.getGameByGameId(gameId);
+        // TODO: 게임 권한 소지 여부 확인 로직 추가
+
+        return generatePresignedUrls(gameId, presignedUrlQuery);
+    }
+
+    private PresignedUrlListResult generatePresignedUrls(UUID gameId, PresignedUrlQuery presignedUrlQuery) {
         List<S3PresignedUrl> presignedUrls = presignedUrlQuery.queries().stream()
                 .map(query -> {
                     String key = String.format("games/%s/%s", gameId, query.imageName());
@@ -96,7 +102,6 @@ public class GameService {
                                     presignedUrl.key());
                         }).toList()
         );
-
     }
 
 }
