@@ -1,7 +1,9 @@
 package org.ject.recreation.core.api.controller;
 
+import org.ject.recreation.core.api.controller.request.PresignedUrlListRequestDto;
 import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
+import org.ject.recreation.core.api.controller.response.PresignedUrlListResponseDto;
 import org.ject.recreation.core.support.response.ApiResponse;
 import org.ject.recreation.storage.db.core.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,9 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -63,9 +63,6 @@ class GameApiIntegrationTest {
                 LocalDateTime.now()
         );
         userRepository.save(user);
-
-        System.out.println("찾자");
-        System.out.println("saved user: " + userRepository.findAll());
 
         games = List.of(
                 createGame("가장 인기 퀴즈", user, 400,true, false),
@@ -279,6 +276,46 @@ class GameApiIntegrationTest {
 
         // then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+    }
+
+    @Test
+    void 게임신규등록_presignedUrl_발급_테스트() {
+        PresignedUrlListRequestDto requestDto = new PresignedUrlListRequestDto(
+                List.of(
+                        new PresignedUrlListRequestDto.PresignedUrlImageDto("test-1.jpg", 0),
+                        new PresignedUrlListRequestDto.PresignedUrlImageDto("test-2.png", 3),
+                        new PresignedUrlListRequestDto.PresignedUrlImageDto("test-3.png", 1)
+                )
+        );
+
+        ResponseEntity<ApiResponse<PresignedUrlListResponseDto>> response = restTemplate.exchange(
+                "/games/uploads/urls",
+                HttpMethod.POST,
+                new HttpEntity<>(requestDto),
+                new ParameterizedTypeReference<>() {}
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        PresignedUrlListResponseDto presignedUrlListResponse
+                = (PresignedUrlListResponseDto) response.getBody().getData();
+
+        assertThat(presignedUrlListResponse.gameId().toString()).isNotBlank();
+
+        List<PresignedUrlListResponseDto.PresignedUrlDto> presignedUrls
+                = presignedUrlListResponse.presignedUrls();
+
+        assertThat(presignedUrls).isNotEmpty();
+
+        IntStream.range(0, requestDto.images().size()).forEach(i -> {
+            PresignedUrlListRequestDto.PresignedUrlImageDto requestImage = requestDto.images().get(i);
+            PresignedUrlListResponseDto.PresignedUrlDto responseImage = presignedUrls.get(i);
+
+            assertThat(responseImage.imageName()).isEqualTo(requestImage.imageName());
+            assertThat(responseImage.questionOrder()).isEqualTo(requestImage.questionOrder());
+            assertThat(responseImage.url()).isNotBlank();
+            assertThat(responseImage.key()).isNotBlank();
+        });
     }
 
     private GameEntity createGame(String title, UserEntity user, long playCount, boolean isShared, boolean isDeleted) {
