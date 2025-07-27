@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.ject.recreation.core.api.controller.request.SocialLoginRequestDto;
 import org.ject.recreation.core.api.controller.response.SocialLoginResponseDto;
 import org.ject.recreation.core.domain.SocialLoginService;
+import org.ject.recreation.core.support.error.ErrorType;
 import org.ject.recreation.core.support.response.ApiResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
@@ -29,16 +30,20 @@ public class SocialLoginController {
 
     @PostMapping("/login/kakao")
     public ApiResponse<SocialLoginResponseDto> login(@RequestBody SocialLoginRequestDto request, HttpSession session) {
-        SocialLoginResponseDto response = socialLoginService.loginWithKakao(request);
-        if (response.getEmail() != null) {
-            SessionUserInfoDto userInfo = SessionUserInfoDto.builder()
-                .email(response.getEmail())
-                .nickname(response.getNickname())
-                .profileImageUrl(response.getProfileImageUrl())
-                .build();
-            session.setAttribute("userInfo", userInfo);
+        try {
+            SocialLoginResponseDto response = socialLoginService.loginWithKakao(request);
+            if (response.getEmail() != null) {
+                SessionUserInfoDto userInfo = SessionUserInfoDto.builder()
+                    .email(response.getEmail())
+                    .nickname(response.getNickname())
+                    .profileImageUrl(response.getProfileImageUrl())
+                    .build();
+                session.setAttribute("userInfo", userInfo);
+            }
+            return ApiResponse.success(response);
+        } catch (Exception e) {
+            return ApiResponse.errorTyped(ErrorType.UNAUTHORIZED);
         }
-        return ApiResponse.success(response);
     }
 
     @GetMapping("/login/kakao/test")
