@@ -6,7 +6,10 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import org.ject.recreation.storage.db.core.GameEntity;
+import org.ject.recreation.storage.db.core.QuestionEntity;
+import org.ject.recreation.storage.db.core.UserEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,5 +35,26 @@ public class CreateGameRequest {
         private int questionOrder;
         private String questionText;
         private String questionAnswer;
+    }
+
+    public GameEntity toGameEntity(UserEntity user) {
+
+        GameEntity game = GameEntity.builder()
+                .gameId(gameId)
+                .gameCreator(user)
+                .gameTitle(gameTitle)
+                .gameThumbnailUrl(gameThumbnailUrl)
+                .build();
+
+        questions.forEach(questionEntity -> {
+            QuestionEntity build = QuestionEntity.builder()
+                    .questionOrder(questionEntity.getQuestionOrder())
+                    .questionText(questionEntity.getQuestionText())
+                    .questionAnswer(questionEntity.getQuestionAnswer())
+                    .imageUrl(questionEntity.getImageUrl())
+                    .build();
+            game.addQuestion(build);
+        });
+        return game;
     }
 }

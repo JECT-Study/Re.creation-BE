@@ -80,4 +80,9 @@ public class GameEntity extends BaseEntity {
     public void plusCount(){
         this.playCount += 1;
     }
+
+    public void addQuestion(QuestionEntity question) {
+        this.questions.add(question);
+        question.setGame(this);
+    }
 }

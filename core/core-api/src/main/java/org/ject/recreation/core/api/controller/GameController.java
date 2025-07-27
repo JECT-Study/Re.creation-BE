@@ -2,6 +2,7 @@ package org.ject.recreation.core.api.controller;
 
 import org.ject.recreation.core.api.controller.request.CreateGameRequest;
 import org.ject.recreation.core.api.controller.request.GameListRequestDto;
+import org.ject.recreation.core.api.controller.request.UpdateGameRequest;
 import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
 import org.ject.recreation.core.api.controller.session.SessionUserInfo;
@@ -77,8 +78,8 @@ public class GameController {
     @PutMapping("/games/{gameId}")
     public ApiResponse<String> updateGame(@SessionUserInfo SessionUserInfoDto userInfo,
                                  @PathVariable UUID gameId,
-                                 @RequestBody CreateGameRequest createGameRequest) {
-        return ApiResponse.success(gameService.updateGame(userInfo, gameId, createGameRequest));
+                                 @RequestBody UpdateGameRequest updateGameRequest) {
+        return ApiResponse.success(gameService.updateGame(userInfo, gameId, updateGameRequest));
     }
 
 }
