@@ -3,6 +3,7 @@ package org.ject.recreation.core.domain.game;
 import lombok.RequiredArgsConstructor;
 import org.ject.recreation.core.api.controller.request.CreateGameRequest;
 import org.ject.recreation.core.api.controller.request.UpdateGameRequest;
+import org.ject.recreation.core.api.controller.response.GameListResponseDto;
 import org.ject.recreation.core.api.controller.session.SessionUserInfoDto;
 import org.ject.recreation.core.domain.game.question.Question;
 import org.ject.recreation.core.domain.game.question.QuestionReader;
@@ -111,5 +112,28 @@ public class GameService {
                 .orElseThrow(() -> new CoreException(ErrorType.GAME_NOT_FOUND));
         existingGame.plusCount();
         return "성공적으로 실행되었습니다.";
+    }
+
+    @Transactional(readOnly = true)
+    public GameListResponseDto getDefaultGame(){
+        // 기본 게임들을 조회 (SampleDataInitializer에서 생성한 게임들)
+        List<GameEntity> defaultGames = gameRepository.
+                findAllByGameCreatorEmailAndIsDeletedFalse("jectreation518@gmail.com");
+        
+        // GameListResponseDto로 변환
+        List<GameListResponseDto.GameDto> gameDtos = defaultGames.stream()
+                .map(game -> GameListResponseDto.GameDto.builder()
+                        .gameId(game.getGameId())
+                        .gameThumbnail(game.getGameThumbnailUrl())
+                        .gameTitle(game.getGameTitle())
+                        .questionCount(game.getQuestionCount())
+                        .playCount(game.getPlayCount())
+                        .updatedAt(game.getUpdatedAt())
+                        .build())
+                .collect(Collectors.toList());
+        
+        return GameListResponseDto.builder()
+                .games(gameDtos)
+                .build();
     }
 }

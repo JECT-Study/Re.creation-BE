@@ -26,7 +26,7 @@ public class QuestionEntity extends BaseEntity {
     @Column(nullable = false, length = 60)
     private String questionAnswer;
 
-    @Column(nullable = true, length = 255)
+    @Column(nullable = true, length = 1000)
     private String imageUrl;
 
     @Version

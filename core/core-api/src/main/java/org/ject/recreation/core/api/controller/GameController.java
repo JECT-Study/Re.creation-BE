@@ -75,11 +75,15 @@ public class GameController {
         return ApiResponse.success(gameService.playGame(gameId));
     }
 
-    @PutMapping("/games/{gameId}")
+    @PutMapping("/{gameId}")
     public ApiResponse<String> updateGame(@SessionUserInfo SessionUserInfoDto userInfo,
                                  @PathVariable UUID gameId,
                                  @RequestBody UpdateGameRequest updateGameRequest) {
         return ApiResponse.success(gameService.updateGame(userInfo, gameId, updateGameRequest));
     }
 
+    @GetMapping("/default")
+    public ApiResponse<GameListResponseDto> getDefaultGameList() {
+        return ApiResponse.success(gameService.getDefaultGame());
+    }
 }

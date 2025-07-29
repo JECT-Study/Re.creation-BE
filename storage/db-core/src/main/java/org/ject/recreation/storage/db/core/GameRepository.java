@@ -30,4 +30,7 @@ public interface GameRepository extends JpaRepository<GameEntity, UUID> {
             Pageable pageable,
             @Param("query") String query
     );
+
+    // 기본 게임들을 조회하는 메서드
+    List<GameEntity> findAllByGameCreatorEmailAndIsDeletedFalse(String gameCreatorEmail);
 }
