@@ -82,7 +82,7 @@ public class SampleDataInitializer implements CommandLineRunner {
                 .gameId(UUID.fromString("16f89e38-b86f-4cb3-b53d-8f0a6a78b8a9"))
                 .gameCreator(user)
                 .gameTitle("이모지 보고 속담 맞추기")
-                .gameThumbnailUrl("https://creationre.s3.ap-northeast-2.amazonaws.com/games/16f89e38-b86f-4cb3-b53d-8f0a6a78b8a9/00_%E1%84%8A%E1%85%A5%E1%86%B7%E1%84%82%E1%85%A6%E1%84%8B%E1%85%B5%E1%86%AF%E1%84%8B%E1%85%B5%E1%84%86%E1%85%B5%E1%84%8C%E1%85%B5.png")
+                .gameThumbnailUrl("games/16f89e38-b86f-4cb3-b53d-8f0a6a78b8a9/00_썸네일이미지.png")
                 .isShared(true)
                 .isDeleted(false)
                 .questionCount(25)
@@ -96,7 +96,7 @@ public class SampleDataInitializer implements CommandLineRunner {
                 .gameId(UUID.fromString("d108c47d-df0d-4421-a5f0-513fa3d40b47"))
                 .gameCreator(user)
                 .gameTitle("줄줄이 말해요")
-                .gameThumbnailUrl("https://creationre.s3.ap-northeast-2.amazonaws.com/games/d108c47d-df0d-4421-a5f0-513fa3d40b47/00_%E1%84%8A%E1%85%A5%E1%86%B7%E1%84%82%E1%85%A6%E1%84%8B%E1%85%B5%E1%86%AF%E1%84%8B%E1%85%B5%E1%84%86%E1%85%B5%E1%84%8C%E1%85%B5.png")
+                .gameThumbnailUrl("games/d108c47d-df0d-4421-a5f0-513fa3d40b47/00_썸네일이미지.png")
                 .isShared(true)
                 .isDeleted(false)
                 .questionCount(20)
@@ -110,7 +110,7 @@ public class SampleDataInitializer implements CommandLineRunner {
                 .gameId(UUID.fromString("25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f"))
                 .gameCreator(user)
                 .gameTitle("인물퀴즈")
-                .gameThumbnailUrl("https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/00_%E1%84%8A%E1%85%A5%E1%86%B7%E1%84%82%E1%85%A6%E1%84%8B%E1%85%B5%E1%86%AF%E1%84%8B%E1%85%B5%E1%84%86%E1%85%B5%E1%84%8C%E1%85%B5.png")
+                .gameThumbnailUrl("games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/00_썸네일이미지.png")
                 .isShared(true)
                 .isDeleted(false)
                 .questionCount(50)
@@ -124,7 +124,7 @@ public class SampleDataInitializer implements CommandLineRunner {
                 .gameId(UUID.fromString("7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2"))
                 .gameCreator(user)
                 .gameTitle("명대사 퀴즈")
-                .gameThumbnailUrl("https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/00_%E1%84%8A%E1%85%A5%E1%86%B7%E1%84%82%E1%85%A6%E1%84%8B%E1%85%B5%E1%86%AF%E1%84%8B%E1%85%B5%E1%84%86%E1%85%B5%E1%84%8C%E1%85%B5.png")
+                .gameThumbnailUrl("games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/00_썸네일이미지.png")
                 .isShared(true)
                 .isDeleted(false)
                 .questionCount(30)
@@ -174,7 +174,7 @@ public class SampleDataInitializer implements CommandLineRunner {
                     .questionOrder(i + 1)
                     .questionText(emojiProverbData[i][0])
                     .questionAnswer(emojiProverbData[i][1])
-                    .imageUrl("https://example.com/emoji" + (i + 1) + ".jpg")
+                    .imageUrl("games/16f89e38-b86f-4cb3-b53d-8f0a6a78b8a9/emoji" + (i + 1) + ".jpg")
                     .version(1)
                     .game(emojiProverbQuiz)
                     .build());
@@ -210,7 +210,7 @@ public class SampleDataInitializer implements CommandLineRunner {
                     .questionOrder(i + 1)
                     .questionText(wordChainData[i][0])
                     .questionAnswer(wordChainData[i][1])
-                    .imageUrl("https://example.com/wordchain" + (i + 1) + ".jpg")
+                    .imageUrl("games/d108c47d-df0d-4421-a5f0-513fa3d40b47/wordchain" + (i + 1) + ".jpg")
                     .version(1)
                     .game(wordChainQuiz)
                     .build());
@@ -219,56 +219,56 @@ public class SampleDataInitializer implements CommandLineRunner {
         // 인물퀴즈 질문들 (50문제)
         GameEntity personQuiz = games.get(2);
         String[][] personData = {
-            {"이미지 속 인물의 이름은?", "김지원 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/01_%E1%84%80%E1%85%B5%E1%86%B7%E1%84%8C%E1%85%B5%E1%84%8B%E1%85%AF%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "코쿤 (음악 프로듀서)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/02_%E1%84%8F%E1%85%A9%E1%84%83%E1%85%B3%E1%84%8F%E1%85%AE%E1%86%AB%E1%84%89%E1%85%B3%E1%84%90%E1%85%B3.jpg"},
-            {"이미지 속 인물의 이름은?", "구교환 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/03_%E1%84%80%E1%85%AE%E1%84%80%E1%85%AD%E1%84%92%E1%85%AA%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "최예나 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/04_%E1%84%8E%E1%85%AC%E1%84%8B%E1%85%A8%E1%84%82%E1%85%A1.jpg"},
-            {"이미지 속 인물의 이름은?", "이용진 (개그맨)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/05_%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%AD%E1%86%BC%E1%84%8C%E1%85%B5%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "변우석 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/06_%E1%84%87%E1%85%A7%E1%86%AB%E1%84%8B%E1%85%AE%E1%84%89%E1%85%A5%E1%86%A8.jpg"},
-            {"이미지 속 인물의 이름은?", "이무진 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/07_%E1%84%8B%E1%85%B5%E1%84%86%E1%85%AE%E1%84%8C%E1%85%B5%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "고경표 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/08_%E1%84%80%E1%85%A9%E1%84%80%E1%85%A7%E1%86%BC%E1%84%91%E1%85%AD.jpg"},
-            {"이미지 속 인물의 이름은?", "오해원 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/09_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%A2%E1%84%8B%E1%85%AF%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "주우재 (모델/방송인)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/10_%E1%84%8C%E1%85%AE%E1%84%8B%E1%85%AE%E1%84%8C%E1%85%A2.jpg"},
-            {"이미지 속 인물의 이름은?", "이영지 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/11_%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%A7%E1%86%BC%E1%84%8C%E1%85%B5.jpg"},
-            {"이미지 속 인물의 이름은?", "손흥민 (축구선수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/12_%E1%84%89%E1%85%A9%E1%86%AB%E1%84%92%E1%85%B3%E1%86%BC%E1%84%86%E1%85%B5%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "고윤정 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/13_%E1%84%80%E1%85%A9%E1%84%8B%E1%85%B2%E1%86%AB%E1%84%8C%E1%85%A5%E1%86%BC.jpg"},
-            {"이미지 속 인물의 이름은?", "김성주 (방송인)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/14_%E1%84%80%E1%85%B5%E1%86%B7%E1%84%89%E1%85%A5%E1%86%BC%E1%84%8C%E1%85%AE.jpg"},
-            {"이미지 속 인물의 이름은?", "박은빈 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/15_%E1%84%87%E1%85%A1%E1%86%A8%E1%84%8B%E1%85%B3%E1%86%AB%E1%84%87%E1%85%B5%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "김연경 (배구선수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/16_%E1%84%80%E1%85%B5%E1%86%B7%E1%84%8B%E1%85%A7%E1%86%AB%E1%84%80%E1%85%A7%E1%86%BC.jpg"},
-            {"이미지 속 인물의 이름은?", "장범준 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/17_%E1%84%8C%E1%85%A1%E1%86%BC%E1%84%87%E1%85%A5%E1%86%B7%E1%84%8C%E1%85%AE%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "최민식 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/18_%E1%84%8E%E1%85%AC%E1%84%86%E1%85%B5%E1%86%AB%E1%84%89%E1%85%B5%E1%86%A8.jpg"},
-            {"이미지 속 인물의 이름은?", "혜인 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/19_%E1%84%92%E1%85%A8%E1%84%8B%E1%85%B5%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "신하균 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/20_%E1%84%89%E1%85%B5%E1%86%AB%E1%84%92%E1%85%A1%E1%84%80%E1%85%B2%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "황정민 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/21_%E1%84%92%E1%85%AA%E1%86%BC%E1%84%8C%E1%85%A5%E1%86%BC%E1%84%86%E1%85%B5%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "규현 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/22_%E1%84%80%E1%85%B2%E1%84%92%E1%85%A7%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "미주 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/23_%E1%84%86%E1%85%B5%E1%84%8C%E1%85%AE.jpg"},
-            {"이미지 속 인물의 이름은?", "조정석 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/24_%E1%84%8C%E1%85%A9%E1%84%8C%E1%85%A5%E1%86%BC%E1%84%89%E1%85%A5%E1%86%A8.jpg"},
-            {"이미지 속 인물의 이름은?", "박미선 (개그우먼)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/25_%E1%84%87%E1%85%A1%E1%86%A8%E1%84%86%E1%85%B5%E1%84%89%E1%85%A5%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "송강 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/26_%E1%84%89%E1%85%A9%E1%86%BC%E1%84%80%E1%85%A1%E1%86%BC.jpg"},
-            {"이미지 속 인물의 이름은?", "키 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/27_%E1%84%8F%E1%85%B5.jpg"},
-            {"이미지 속 인물의 이름은?", "톰 크루즈 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/28_%E1%84%90%E1%85%A9%E1%86%B7%E1%84%8F%E1%85%B3%E1%84%85%E1%85%AE%E1%84%8C%E1%85%B3.jpg"},
-            {"이미지 속 인물의 이름은?", "웬디 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/29_%E1%84%8B%E1%85%B0%E1%86%AB%E1%84%83%E1%85%B5.jpg"},
-            {"이미지 속 인물의 이름은?", "이순신 (역사 인물)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/30_%E1%84%8B%E1%85%B5%E1%84%89%E1%85%AE%E1%86%AB%E1%84%89%E1%85%B5%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "김태리 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/31_%E1%84%80%E1%85%B5%E1%86%B7%E1%84%90%E1%85%A2%E1%84%85%E1%85%B5.jpg"},
-            {"이미지 속 인물의 이름은?", "장도연 (개그우먼)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/32_%E1%84%8C%E1%85%A1%E1%86%BC%E1%84%83%E1%85%A9%E1%84%8B%E1%85%A7%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "임시완 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/33_%E1%84%8B%E1%85%B5%E1%86%B7%E1%84%89%E1%85%B5%E1%84%8B%E1%85%AA%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "임지연 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/34_%E1%84%8B%E1%85%B5%E1%86%B7%E1%84%8C%E1%85%B5%E1%84%8B%E1%85%A7%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "박재범 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/35_%E1%84%87%E1%85%A1%E1%86%A8%E1%84%8C%E1%85%A2%E1%84%87%E1%85%A5%E1%86%B7.jpg"},
-            {"이미지 속 인물의 이름은?", "안유진 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/36_%E1%84%8B%E1%85%A1%E1%86%AB%E1%84%8B%E1%85%B2%E1%84%8C%E1%85%B5%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "유연석 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/37_%E1%84%8B%E1%85%B2%E1%84%8B%E1%85%A7%E1%86%AB%E1%84%89%E1%85%A5%E1%86%A8.jpg"},
-            {"이미지 속 인물의 이름은?", "양세찬 (개그맨)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/38_%E1%84%8B%E1%85%A3%E1%86%BC%E1%84%89%E1%85%A6%E1%84%8E%E1%85%A1%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "나문희 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/39_%E1%84%82%E1%85%A1%E1%84%86%E1%85%AE%E1%86%AB%E1%84%92%E1%85%B4.jpg"},
-            {"이미지 속 인물의 이름은?", "윤하 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/40_%E1%84%8B%E1%85%B2%E1%86%AB%E1%84%92%E1%85%A1.jpg"},
-            {"이미지 속 인물의 이름은?", "손석구 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/41_%E1%84%89%E1%85%A9%E1%86%AB%E1%84%89%E1%85%A5%E1%86%A8%E1%84%80%E1%85%AE.jpg"},
-            {"이미지 속 인물의 이름은?", "홍진경 (모델/방송인)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/42_%E1%84%92%E1%85%A9%E1%86%BC%E1%84%8C%E1%85%B5%E1%86%AB%E1%84%80%E1%85%A7%E1%86%BC.jpg"},
-            {"이미지 속 인물의 이름은?", "태양 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/43_%E1%84%90%E1%85%A2%E1%84%8B%E1%85%A3%E1%86%BC.jpg"},
-            {"이미지 속 인물의 이름은?", "이은지 (개그우먼)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/44_%E1%84%8B%E1%85%B5%E1%84%8B%E1%85%B3%E1%86%AB%E1%84%8C%E1%85%B5.jpg"},
-            {"이미지 속 인물의 이름은?", "소유 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/45_%E1%84%89%E1%85%A9%E1%84%8B%E1%85%B2.jpg"},
-            {"이미지 속 인물의 이름은?", "이제훈 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/46_%E1%84%8B%E1%85%B5%E1%84%8C%E1%85%A6%E1%84%92%E1%85%AE%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "뷔 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/47_%E1%84%87%E1%85%B1.jpg"},
-            {"이미지 속 인물의 이름은?", "윈터 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/48_%E1%84%8B%E1%85%B1%E1%86%AB%E1%84%90%E1%85%A5.jpg"},
-            {"이미지 속 인물의 이름은?", "카더가든 (가수)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/49_%E1%84%8F%E1%85%A1%E1%84%83%E1%85%A5%E1%84%80%E1%85%A1%E1%84%83%E1%85%B3%E1%86%AB.jpg"},
-            {"이미지 속 인물의 이름은?", "조진웅 (배우)", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/50_%E1%84%8C%E1%85%A9%E1%84%8C%E1%85%B5%E1%86%AB%E1%84%8B%E1%85%AE%E1%86%BC.jpg"}
+            {"이미지 속 인물의 이름은?", "김지원 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/01_김지원.jpg"},
+            {"이미지 속 인물의 이름은?", "코쿤 (음악 프로듀서)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/02_코쿤.jpg"},
+            {"이미지 속 인물의 이름은?", "구교환 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/03_구교환.jpg"},
+            {"이미지 속 인물의 이름은?", "최예나 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/04_최예나.jpg"},
+            {"이미지 속 인물의 이름은?", "이용진 (개그맨)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/05_이용진.jpg"},
+            {"이미지 속 인물의 이름은?", "변우석 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/06_변우석.jpg"},
+            {"이미지 속 인물의 이름은?", "이무진 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/07_이무진.jpg"},
+            {"이미지 속 인물의 이름은?", "고경표 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/08_고경표.jpg"},
+            {"이미지 속 인물의 이름은?", "오해원 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/09_오해원.jpg"},
+            {"이미지 속 인물의 이름은?", "주우재 (모델/방송인)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/10_주우재.jpg"},
+            {"이미지 속 인물의 이름은?", "이영지 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/11_이영지.jpg"},
+            {"이미지 속 인물의 이름은?", "손흥민 (축구선수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/12_손흥민.jpg"},
+            {"이미지 속 인물의 이름은?", "고윤정 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/13_고윤정.jpg"},
+            {"이미지 속 인물의 이름은?", "김성주 (방송인)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/14_김성주.jpg"},
+            {"이미지 속 인물의 이름은?", "박은빈 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/15_박은빈.jpg"},
+            {"이미지 속 인물의 이름은?", "김연경 (배구선수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/16_김연경.jpg"},
+            {"이미지 속 인물의 이름은?", "장범준 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/17_장범준.jpg"},
+            {"이미지 속 인물의 이름은?", "최민식 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/18_최민식.jpg"},
+            {"이미지 속 인물의 이름은?", "혜인 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/19_혜인.jpg"},
+            {"이미지 속 인물의 이름은?", "신하균 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/20_신하균.jpg"},
+            {"이미지 속 인물의 이름은?", "황정민 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/21_황정민.jpg"},
+            {"이미지 속 인물의 이름은?", "규현 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/22_규현.jpg"},
+            {"이미지 속 인물의 이름은?", "미주 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/23_미주.jpg"},
+            {"이미지 속 인물의 이름은?", "조정석 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/24_조정석.jpg"},
+            {"이미지 속 인물의 이름은?", "박미선 (개그우먼)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/25_박미선.jpg"},
+            {"이미지 속 인물의 이름은?", "송강 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/26_송강.jpg"},
+            {"이미지 속 인물의 이름은?", "키 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/27_키.jpg"},
+            {"이미지 속 인물의 이름은?", "톰 크루즈 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/28_톰크루즈.jpg"},
+            {"이미지 속 인물의 이름은?", "웬디 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/29_웬디.jpg"},
+            {"이미지 속 인물의 이름은?", "이순신 (역사 인물)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/30_이순신.jpg"},
+            {"이미지 속 인물의 이름은?", "김태리 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/31_김태리.jpg"},
+            {"이미지 속 인물의 이름은?", "장도연 (개그우먼)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/32_장도연.jpg"},
+            {"이미지 속 인물의 이름은?", "임시완 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/33_임시완.jpg"},
+            {"이미지 속 인물의 이름은?", "임지연 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/34_임지연.jpg"},
+            {"이미지 속 인물의 이름은?", "박재범 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/35_박재범.jpg"},
+            {"이미지 속 인물의 이름은?", "안유진 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/36_안유진.jpg"},
+            {"이미지 속 인물의 이름은?", "유연석 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/37_유연석.jpg"},
+            {"이미지 속 인물의 이름은?", "양세찬 (개그맨)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/38_양세찬.jpg"},
+            {"이미지 속 인물의 이름은?", "나문희 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/39_나문희.jpg"},
+            {"이미지 속 인물의 이름은?", "윤하 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/40_윤하.jpg"},
+            {"이미지 속 인물의 이름은?", "손석구 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/41_손석구.jpg"},
+            {"이미지 속 인물의 이름은?", "홍진경 (모델/방송인)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/42_홍진경.jpg"},
+            {"이미지 속 인물의 이름은?", "태양 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/43_태양.jpg"},
+            {"이미지 속 인물의 이름은?", "이은지 (개그우먼)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/44_이은지.jpg"},
+            {"이미지 속 인물의 이름은?", "소유 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/45_소유.jpg"},
+            {"이미지 속 인물의 이름은?", "이제훈 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/46_이제훈.jpg"},
+            {"이미지 속 인물의 이름은?", "뷔 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/47_뷔.jpg"},
+            {"이미지 속 인물의 이름은?", "윈터 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/48_윈터.jpg"},
+            {"이미지 속 인물의 이름은?", "카더가든 (가수)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/49_카더가든.jpg"},
+            {"이미지 속 인물의 이름은?", "조진웅 (배우)", "games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/50_조진웅.jpg"}
         };
 
         for (int i = 0; i < personData.length; i++) {
@@ -285,41 +285,41 @@ public class SampleDataInitializer implements CommandLineRunner {
         // 명대사 퀴즈 질문들 (30문제)
         GameEntity famousQuoteQuiz = games.get(3);
         String[][] famousQuoteData = {
-            {"다음 장면의 대사는?", "도깨비: \"사랑해요\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/01_%E1%84%83%E1%85%A9%E1%84%81%E1%85%A2%E1%84%87%E1%85%B5.jpg"},
-            {"다음 장면의 대사는?", "미안하다 사랑한다: \"밥 먹을래 나랑 같이 죽을래!\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/02_%E1%84%86%E1%85%B5%E1%84%8B%E1%85%A1%E1%86%AB%E1%84%92%E1%85%A1%E1%84%83%E1%85%A1%E1%84%89%E1%85%A1%E1%84%85%E1%85%A1%E1%86%BC%E1%84%92%E1%85%A1%E1%86%AB%E1%84%83%E1%85%A1.jpg"},
-            {"다음 장면의 대사는?", "상속자들: \"사탄들의 학교에 루시퍼의 등장이라\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/03_%E1%84%89%E1%85%A1%E1%86%BC%E1%84%89%E1%85%A9%E1%86%A8%E1%84%8C%E1%85%A1%E1%84%83%E1%85%B3%E1%86%AF.jpg"},
-            {"다음 장면의 대사는?", "거침없이 하이킥: \"호- 박- 고- 구- 마- 호- 박- 고- 구- 마!\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/04_%E1%84%80%E1%85%A5%E1%84%8E%E1%85%B5%E1%86%B7%E1%84%8B%E1%85%A5%E1%86%B9%E1%84%8B%E1%85%B5%E1%84%92%E1%85%A1%E1%84%8B%E1%85%B5%E1%84%8F%E1%85%B5%E1%86%A8.jpg"},
-            {"다음 장면의 대사는?", "극한직업: \"지금까지 이런 맛은 없었다. 이것은 갈비인가 통닭인가?\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/05_%E1%84%80%E1%85%B3%E1%86%A8%E1%84%92%E1%85%A1%E1%86%AB%E1%84%8C%E1%85%B5%E1%86%A8%E1%84%8B%E1%85%A5%E1%86%B8.jpg"},
-            {"다음 장면의 대사는?", "스카이 캐슬: \"저를 전적으로 믿으셔야 합니다.\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/06_%E1%84%89%E1%85%B3%E1%84%8F%E1%85%A1%E1%84%8B%E1%85%B5%E1%84%8F%E1%85%A2%E1%84%89%E1%85%B3%E1%86%AF.jpg"},
-            {"다음 장면의 대사는?", "타짜: \"묻고 떠블로 가!\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/07_%E1%84%90%E1%85%A1%E1%84%8D%E1%85%A1.jpg"},
-            {"다음 장면의 대사는?", "범죄도시: \"진실의 방으로.\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/08_%E1%84%87%E1%85%A5%E1%86%B7%E1%84%8C%E1%85%AC%E1%84%83%E1%85%A9%E1%84%89%E1%85%B5.jpg"},
-            {"다음 장면의 대사는?", "기생충: \"오 너는 다 계획이 있구나.\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/09_%E1%84%80%E1%85%B5%E1%84%89%E1%85%A2%E1%86%BC%E1%84%8E%E1%85%AE%E1%86%BC.jpg"},
-            {"다음 장면의 대사는?", "지붕뚫고하이킥: \"엄청 커다란 모기가 나의 발을 물었어! 간지러웟어!\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/10_%E1%84%8C%E1%85%B5%E1%84%87%E1%85%AE%E1%86%BC%E1%84%84%E1%85%AE%E1%86%B6%E1%84%80%E1%85%A9%E1%84%92%E1%85%A1%E1%84%8B%E1%85%B5%E1%84%8F%E1%85%B5%E1%86%A8.jpg"},
-            {"다음 장면의 대사는?", "파리의 연인: \"애기야 가자\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/11_%E1%84%91%E1%85%A1%E1%84%85%E1%85%B5%E1%84%8B%E1%85%B4%E1%84%8B%E1%85%A7%E1%86%AB%E1%84%8B%E1%85%B5%E1%86%AB.jpg"},
-            {"다음 장면의 대사는?", "응답하라 1988: \"내 신경은 온통 너였어.\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/12_%E1%84%8B%E1%85%B3%E1%86%BC%E1%84%91%E1%85%A1%E1%86%AF.jpg"},
-            {"다음 장면의 대사는?", "천국의 계단: \"사랑은 돌아오는 거야.\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/13_%E1%84%8E%E1%85%A5%E1%86%AB%E1%84%80%E1%85%AE%E1%86%A8%E1%84%8B%E1%85%B4%E1%84%80%E1%85%A8%E1%84%83%E1%85%A1%E1%86%AB.jpg"},
-            {"다음 장면의 대사는?", "내 남편과 결혼해줘: \"내는 니 좋아했다꼬!\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/14_%E1%84%82%E1%85%A2%E1%84%82%E1%85%A1%E1%86%B7%E1%84%80%E1%85%A7%E1%86%AF.jpg"},
-            {"다음 장면의 대사는?", "부부의 세계: \"사랑에 빠진 게 죄는 아니잖아!\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/15_%E1%84%87%E1%85%AE%E1%84%87%E1%85%AE%E1%84%8B%E1%85%B4%E1%84%89%E1%85%A6%E1%84%80%E1%85%A8.jpg"},
-            {"다음 장면의 대사는?", "시크릿가든: \"길라임씨는 언제부터 그렇게 예뻤나, 작년부터?\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/16_%E1%84%89%E1%85%B5%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%BA%E1%84%80%E1%85%A1%E1%84%83%E1%85%B3%E1%86%AB.jpg"},
-            {"다음 장면의 대사는?", "이상한 변호사 우영우: \"너는 봄날의 햇살 같아\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/17_%E1%84%8B%E1%85%AE%E1%84%8B%E1%85%A7%E1%86%BC%E1%84%8B%E1%85%AE.jpg"},
-            {"다음 장면의 대사는?", "사랑했나봐: \"예나 선정이 딸이에요\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/18_%E1%84%89%E1%85%A1%E1%84%85%E1%85%A1%E1%86%BC%E1%84%92%E1%85%A2%E1%86%BB%E1%84%82%E1%85%A1%E1%84%87%E1%85%AA.jpg"},
-            {"다음 장면의 대사는?", "친절한 금자씨: \"너나 잘하세요.\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/19_%E1%84%8E%E1%85%B5%E1%86%AB%E1%84%8C%E1%85%A5%E1%86%AF%E1%84%92%E1%85%A1%E1%86%AB%E1%84%80%E1%85%B3%E1%86%B7%E1%84%8C%E1%85%A1%E1%84%8A%E1%85%B5.jpg"},
-            {"다음 장면의 대사는?", "해를 품은 달: \"잊어달라 하였느냐. 잊어주길 바라느냐. 미안하구나 잊으려 하였으나 너를 잊지 못하였다.\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/20_%E1%84%92%E1%85%A2%E1%84%91%E1%85%AE%E1%86%B7%E1%84%83%E1%85%A1%E1%86%AF.jpg"},
-            {"다음 장면의 대사는?", "지붕뚫고 하이킥: \"이 빵꾸똥꾸야!\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/21_%E1%84%8C%E1%85%B5%E1%84%87%E1%85%AE%E1%86%BC%E1%84%84%E1%85%AE%E1%86%B6%E1%84%80%E1%85%A9%E1%84%92%E1%85%A1%E1%84%8B%E1%85%B5%E1%84%8F%E1%85%B5%E1%86%A8.jpg"},
-            {"다음 장면의 대사는?", "대장금: \"어찌 홍시라 생각했느냐 하시면 그냥 홍시맛이나서 홍시라 생각한 것이온데.\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/22_%E1%84%83%E1%85%A2%E1%84%8C%E1%85%A1%E1%86%BC%E1%84%80%E1%85%B3%E1%86%B7.jpg"},
-            {"다음 장면의 대사는?", "말아톤: \"초원이 다리는 백만불짜리 다리!\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/23_%E1%84%86%E1%85%A1%E1%86%AF%E1%84%8B%E1%85%A1%E1%84%90%E1%85%A9%E1%86%AB.jpg"},
-            {"다음 장면의 대사는?", "내부자들: \"모히또 가서 몰디브 한 잔 할까?\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/24_%E1%84%82%E1%85%A2%E1%84%87%E1%85%AE%E1%84%8C%E1%85%A1%E1%84%83%E1%85%B3%E1%86%AF.jpg"},
-            {"다음 장면의 대사는?", "야인시대: \"사딸라!\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/25_%E1%84%8B%E1%85%A3%E1%84%8B%E1%85%B5%E1%86%AB%E1%84%89%E1%85%B5%E1%84%83%E1%85%A2.jpg"},
-            {"다음 장면의 대사는?", "꽃보다 남자: \"시켜줘 그럼. 금잔디 명예 소방관\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/26_%E1%84%81%E1%85%A9%E1%86%BE%E1%84%82%E1%85%A1%E1%86%B7.jpg"},
-            {"다음 장면의 대사는?", "빠담빠담: \"사과해요 나한테!\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/27_%E1%84%88%E1%85%A1%E1%84%83%E1%85%A1%E1%86%B7%E1%84%88%E1%85%A1%E1%84%83%E1%85%A1%E1%86%B7.jpg"},
-            {"다음 장면의 대사는?", "오징어 게임: \"우리는 깐부잖아\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/28_%E1%84%8B%E1%85%A9%E1%84%8C%E1%85%B5%E1%86%BC%E1%84%8B%E1%85%A5%E1%84%80%E1%85%A6%E1%84%8B%E1%85%B5%E1%86%B7.jpg"},
-            {"다음 장면의 대사는?", "신데렐라 언니 : \"넌 꿈이 뭐니\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/29_%E1%84%89%E1%85%B5%E1%86%AB%E1%84%83%E1%85%A6%E1%84%85%E1%85%A6%E1%86%AF%E1%84%85%E1%85%A1%E1%84%8B%E1%85%A5%E1%86%AB%E1%84%82%E1%85%B5.jpg"},
-            {"다음 장면의 대사는?", "태조 왕건: \"누구인가? 누가 기침소리를 내었어.\"", "https://creationre.s3.ap-northeast-2.amazonaws.com/games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/30_%E1%84%90%E1%85%A2%E1%84%8C%E1%85%A9%E1%84%8B%E1%85%AA%E1%86%BC%E1%84%80%E1%85%A5%E1%86%AB.jpg"}
+            {"다음 장면의 대사는?", "도깨비: \"사랑해요\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/01_도깨비.jpg"},
+            {"다음 장면의 대사는?", "미안하다 사랑한다: \"밥 먹을래 나랑 같이 죽을래!\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/02_미안하다사랑한다.jpg"},
+            {"다음 장면의 대사는?", "상속자들: \"사탄들의 학교에 루시퍼의 등장이라\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/03_상속자들.jpg"},
+            {"다음 장면의 대사는?", "거침없이 하이킥: \"호- 박- 고- 구- 마- 호- 박- 고- 구- 마!\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/04_거침없이하이킥.jpg"},
+            {"다음 장면의 대사는?", "극한직업: \"지금까지 이런 맛은 없었다. 이것은 갈비인가 통닭인가?\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/05_극한직업.jpg"},
+            {"다음 장면의 대사는?", "스카이 캐슬: \"저를 전적으로 믿으셔야 합니다.\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/06_스카이캐슬.jpg"},
+            {"다음 장면의 대사는?", "타짜: \"묻고 떠블로 가!\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/07_타짜.jpg"},
+            {"다음 장면의 대사는?", "범죄도시: \"진실의 방으로.\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/08_범죄도시.jpg"},
+            {"다음 장면의 대사는?", "기생충: \"오 너는 다 계획이 있구나.\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/09_기생충.jpg"},
+            {"다음 장면의 대사는?", "지붕뚫고하이킥: \"엄청 커다란 모기가 나의 발을 물었어! 간지러웟어!\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/10_지붕뚫고하이킥.jpg"},
+            {"다음 장면의 대사는?", "파리의 연인: \"애기야 가자\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/11_파리의연인.jpg"},
+            {"다음 장면의 대사는?", "응답하라 1988: \"내 신경은 온통 너였어.\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/12_응답하라.jpg"},
+            {"다음 장면의 대사는?", "천국의 계단: \"사랑은 돌아오는 거야.\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/13_천국의계단.jpg"},
+            {"다음 장면의 대사는?", "내 남편과 결혼해줘: \"내는 니 좋아했다꼬!\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/14_내남편과결혼해줘.jpg"},
+            {"다음 장면의 대사는?", "부부의 세계: \"사랑에 빠진 게 죄는 아니잖아!\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/15_부부의세계.jpg"},
+            {"다음 장면의 대사는?", "시크릿가든: \"길라임씨는 언제부터 그렇게 예뻤나, 작년부터?\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/16_시크릿가든.jpg"},
+            {"다음 장면의 대사는?", "이상한 변호사 우영우: \"너는 봄날의 햇살 같아\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/17_우영우.jpg"},
+            {"다음 장면의 대사는?", "사랑했나봐: \"예나 선정이 딸이에요\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/18_사랑했나봐.jpg"},
+            {"다음 장면의 대사는?", "친절한 금자씨: \"너나 잘하세요.\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/19_친절한금자씨.jpg"},
+            {"다음 장면의 대사는?", "해를 품은 달: \"잊어달라 하였느냐. 잊어주길 바라느냐. 미안하구나 잊으려 하였으나 너를 잊지 못하였다.\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/20_해를품은달.jpg"},
+            {"다음 장면의 대사는?", "지붕뚫고 하이킥: \"이 빵꾸똥꾸야!\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/21_지붕뚫고하이킥.jpg"},
+            {"다음 장면의 대사는?", "대장금: \"어찌 홍시라 생각했느냐 하시면 그냥 홍시맛이나서 홍시라 생각한 것이온데.\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/22_대장금.jpg"},
+            {"다음 장면의 대사는?", "말아톤: \"초원이 다리는 백만불짜리 다리!\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/23_말아톤.jpg"},
+            {"다음 장면의 대사는?", "내부자들: \"모히또 가서 몰디브 한 잔 할까?\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/24_내부자들.jpg"},
+            {"다음 장면의 대사는?", "야인시대: \"사딸라!\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/25_야인시대.jpg"},
+            {"다음 장면의 대사는?", "꽃보다 남자: \"시켜줘 그럼. 금잔디 명예 소방관\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/26_꽃보다남자.jpg"},
+            {"다음 장면의 대사는?", "빠담빠담: \"사과해요 나한테!\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/27_빠담빠담.jpg"},
+            {"다음 장면의 대사는?", "오징어 게임: \"우리는 깐부잖아\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/28_오징어게임.jpg"},
+            {"다음 장면의 대사는?", "신데렐라 언니 : \"넌 꿈이 뭐니\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/29_신데렐라언니.jpg"},
+            {"다음 장면의 대사는?", "태조 왕건: \"누구인가? 누가 기침소리를 내었어.\"", "games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/30_태조왕건.jpg"}
         };
 
         for (int i = 0; i < famousQuoteData.length; i++) {
             questions.add(QuestionEntity.builder()
-                    .questionOrder(i + 1)
+                    .questionOrder(i)
                     .questionText(famousQuoteData[i][0])
                     .questionAnswer(famousQuoteData[i][1])
                     .imageUrl(famousQuoteData[i][2])
