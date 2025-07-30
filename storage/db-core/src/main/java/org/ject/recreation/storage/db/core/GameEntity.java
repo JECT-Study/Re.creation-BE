@@ -34,7 +34,7 @@ public class GameEntity extends BaseEntity {
     @Column(nullable = false, length = 200)
     private String gameTitle;
 
-    @Column(nullable = true, length = 1000)
+    @Column(nullable = true, length = 255)
     private String gameThumbnailUrl;
 
     @Column(nullable = false)

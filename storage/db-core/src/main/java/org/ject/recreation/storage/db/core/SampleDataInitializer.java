@@ -22,20 +22,25 @@ public class SampleDataInitializer implements CommandLineRunner {
 
     private final QuestionRepository questionRepository;
 
+    private final String emojiGameId = "16f89e38-b86f-4cb3-b53d-8f0a6a78b8a9";
+    private final String wordChainGameId = "d108c47d-df0d-4421-a5f0-513fa3d40b47";
+    private final String personGameId = "25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f";
+    private final String famousQuotoGameId = "7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2";
+
     @Override
     @Transactional
     public void run(String... args) throws Exception {
         // 이모지 게임이 이미 존재하는지 확인
-        Optional<GameEntity> emojiGame = gameRepository.findById(UUID.fromString("550e8400-e29b-41d4-a716-446655440000"));
-        
+        Optional<GameEntity> emojiGame = gameRepository.findById(UUID.fromString(emojiGameId));
+
         // 줄줄이 말해요 게임이 이미 존재하는지 확인
-        Optional<GameEntity> wordChainGame = gameRepository.findById(UUID.fromString("550e8400-e29b-41d4-a716-446655440001"));
-        
+        Optional<GameEntity> wordChainGame = gameRepository.findById(UUID.fromString(wordChainGameId));
+
         // 인물퀴즈 게임이 이미 존재하는지 확인
-        Optional<GameEntity> personGame = gameRepository.findById(UUID.fromString("550e8400-e29b-41d4-a716-446655440002"));
-        
+        Optional<GameEntity> personGame = gameRepository.findById(UUID.fromString(personGameId));
+
         // 명대사 퀴즈 게임이 이미 존재하는지 확인
-        Optional<GameEntity> famousQuoteGame = gameRepository.findById(UUID.fromString("550e8400-e29b-41d4-a716-446655440003"));
+        Optional<GameEntity> famousQuoteGame = gameRepository.findById(UUID.fromString(famousQuotoGameId));
 
         // admin 이미 존재하는지 확인
         Optional<UserEntity> admin = userRepository.findById("jectreation518@gmail.com");
@@ -79,7 +84,7 @@ public class SampleDataInitializer implements CommandLineRunner {
 
         // 이모지 보고 속담 맞추기 (25문제)
         GameEntity emojiProverbQuiz = GameEntity.builder()
-                .gameId(UUID.fromString("16f89e38-b86f-4cb3-b53d-8f0a6a78b8a9"))
+                .gameId(UUID.fromString(emojiGameId))
                 .gameCreator(user)
                 .gameTitle("이모지 보고 속담 맞추기")
                 .gameThumbnailUrl("games/16f89e38-b86f-4cb3-b53d-8f0a6a78b8a9/00_썸네일이미지.png")
@@ -93,7 +98,7 @@ public class SampleDataInitializer implements CommandLineRunner {
 
         // 줄줄이 말해요 (20문제)
         GameEntity wordChainQuiz = GameEntity.builder()
-                .gameId(UUID.fromString("d108c47d-df0d-4421-a5f0-513fa3d40b47"))
+                .gameId(UUID.fromString(wordChainGameId))
                 .gameCreator(user)
                 .gameTitle("줄줄이 말해요")
                 .gameThumbnailUrl("games/d108c47d-df0d-4421-a5f0-513fa3d40b47/00_썸네일이미지.png")
@@ -107,7 +112,7 @@ public class SampleDataInitializer implements CommandLineRunner {
 
         // 인물퀴즈 (50문제)
         GameEntity personQuiz = GameEntity.builder()
-                .gameId(UUID.fromString("25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f"))
+                .gameId(UUID.fromString(personGameId))
                 .gameCreator(user)
                 .gameTitle("인물퀴즈")
                 .gameThumbnailUrl("games/25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f/00_썸네일이미지.png")
@@ -121,7 +126,7 @@ public class SampleDataInitializer implements CommandLineRunner {
 
         // 명대사 퀴즈 (30문제)
         GameEntity famousQuoteQuiz = GameEntity.builder()
-                .gameId(UUID.fromString("7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2"))
+                .gameId(UUID.fromString(famousQuotoGameId))
                 .gameCreator(user)
                 .gameTitle("명대사 퀴즈")
                 .gameThumbnailUrl("games/7f9b3c8e-98b2-4cb1-909e-10a7ed3dc7a2/00_썸네일이미지.png")
@@ -171,10 +176,9 @@ public class SampleDataInitializer implements CommandLineRunner {
 
         for (int i = 0; i < emojiProverbData.length; i++) {
             questions.add(QuestionEntity.builder()
-                    .questionOrder(i + 1)
+                    .questionOrder(i)
                     .questionText(emojiProverbData[i][0])
                     .questionAnswer(emojiProverbData[i][1])
-                    .imageUrl("games/16f89e38-b86f-4cb3-b53d-8f0a6a78b8a9/emoji" + (i + 1) + ".jpg")
                     .version(1)
                     .game(emojiProverbQuiz)
                     .build());
@@ -207,10 +211,9 @@ public class SampleDataInitializer implements CommandLineRunner {
 
         for (int i = 0; i < wordChainData.length; i++) {
             questions.add(QuestionEntity.builder()
-                    .questionOrder(i + 1)
+                    .questionOrder(i)
                     .questionText(wordChainData[i][0])
                     .questionAnswer(wordChainData[i][1])
-                    .imageUrl("games/d108c47d-df0d-4421-a5f0-513fa3d40b47/wordchain" + (i + 1) + ".jpg")
                     .version(1)
                     .game(wordChainQuiz)
                     .build());
@@ -273,7 +276,7 @@ public class SampleDataInitializer implements CommandLineRunner {
 
         for (int i = 0; i < personData.length; i++) {
             questions.add(QuestionEntity.builder()
-                    .questionOrder(i + 1)
+                    .questionOrder(i)
                     .questionText(personData[i][0])
                     .questionAnswer(personData[i][1])
                     .imageUrl(personData[i][2])
