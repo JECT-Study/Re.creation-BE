@@ -1,6 +1,10 @@
 package org.ject.recreation.core.domain.game;
 
-import lombok.RequiredArgsConstructor;
+import org.ject.recreation.S3PresignedUrl;
+import org.ject.recreation.S3PresignedUrlManager;
+import org.ject.recreation.core.domain.game.upload.PresignedUrlListResult;
+import org.ject.recreation.core.domain.game.upload.PresignedUrlQuery;
+import org.ject.recreation.core.domain.game.upload.PresignedUrlResult;
 import org.ject.recreation.core.api.controller.request.CreateGameRequest;
 import org.ject.recreation.core.api.controller.request.UpdateGameRequest;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
@@ -11,12 +15,14 @@ import org.ject.recreation.core.domain.game.question.QuestionResult;
 import org.ject.recreation.core.support.error.CoreException;
 import org.ject.recreation.core.support.error.ErrorType;
 import org.ject.recreation.storage.db.core.*;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.IntStream;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,6 +31,7 @@ public class GameService {
 
     private final GameReader gameReader;
     private final QuestionReader questionReader;
+    private final S3PresignedUrlManager s3PresignedUrlManager;
     private final UserRepository userRepository;
     private final GameRepository gameRepository;
     private final QuestionRepository questionRepository;
@@ -66,6 +73,40 @@ public class GameService {
                                 question.questionAnswer(),
                                 question.version()))
                         .toList()
+        );
+    }
+
+    public PresignedUrlListResult getPresignedUrls(PresignedUrlQuery presignedUrlQuery) {
+        return generatePresignedUrls(UUID.randomUUID(), presignedUrlQuery);
+    }
+
+    public PresignedUrlListResult getPresignedUrls(UUID gameId, PresignedUrlQuery presignedUrlQuery) {
+        Game game = gameReader.getGameByGameId(gameId);
+        // TODO: 게임 권한 소지 여부 확인 로직 추가
+
+        return generatePresignedUrls(gameId, presignedUrlQuery);
+    }
+
+    private PresignedUrlListResult generatePresignedUrls(UUID gameId, PresignedUrlQuery presignedUrlQuery) {
+        List<S3PresignedUrl> presignedUrls = presignedUrlQuery.queries().stream()
+                .map(query -> {
+                    String key = String.format("games/%s/%s", gameId, query.imageName());
+                    return s3PresignedUrlManager.generatePresignedUrl(key);
+                })
+                .toList();
+
+        return new PresignedUrlListResult(
+                gameId,
+                IntStream.range(0, presignedUrlQuery.queries().size())
+                        .mapToObj(i -> {
+                            PresignedUrlQuery.QuestionImageQuery query = presignedUrlQuery.queries().get(i);
+                            S3PresignedUrl presignedUrl = presignedUrls.get(i);
+                            return new PresignedUrlResult(
+                                    query.imageName(),
+                                    query.questionOrder(),
+                                    presignedUrl.url(),
+                                    presignedUrl.key());
+                        }).toList()
         );
     }
 
@@ -137,4 +178,5 @@ public class GameService {
                 .games(gameDtos)
                 .build();
     }
+  
 }

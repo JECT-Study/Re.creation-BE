@@ -2,14 +2,17 @@ package org.ject.recreation.core.api.controller;
 
 import org.ject.recreation.core.api.controller.request.CreateGameRequest;
 import org.ject.recreation.core.api.controller.request.GameListRequestDto;
+import org.ject.recreation.core.api.controller.request.PresignedUrlListRequestDto;
 import org.ject.recreation.core.api.controller.request.UpdateGameRequest;
-import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
+import org.ject.recreation.core.api.controller.response.PresignedUrlListResponseDto;
+import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
 import org.ject.recreation.core.api.controller.session.SessionUserInfo;
 import org.ject.recreation.core.api.controller.session.SessionUserInfoDto;
 import org.ject.recreation.core.domain.game.GameDetailResult;
 import org.ject.recreation.core.domain.game.GameListResult;
 import org.ject.recreation.core.domain.game.GameService;
+import org.ject.recreation.core.domain.game.upload.PresignedUrlListResult;
 import org.ject.recreation.core.support.response.ApiResponse;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,7 +64,38 @@ public class GameController {
                                 question.version()))
                         .toList()
         ));
+    }
 
+    @PostMapping("/uploads/urls")
+    public ApiResponse<PresignedUrlListResponseDto> getPresignedUrls(@RequestBody PresignedUrlListRequestDto request) {
+        PresignedUrlListResult presignedUrlListResult = gameService.getPresignedUrls(request.toPresignedUrlQuery());
+
+        return ApiResponse.success(new PresignedUrlListResponseDto(
+                presignedUrlListResult.gameId(),
+                presignedUrlListResult.presignedUrls().stream()
+                        .map(url -> new PresignedUrlListResponseDto.PresignedUrlDto(
+                                url.imageName(),
+                                url.questionOrder(),
+                                url.url(),
+                                url.key()))
+                        .toList()
+        ));
+    }
+
+    @PostMapping("/{gameId}/uploads/urls")
+    public ApiResponse<PresignedUrlListResponseDto> getPresignedUrls(@PathVariable UUID gameId, @RequestBody PresignedUrlListRequestDto request) {
+        PresignedUrlListResult presignedUrlListResult = gameService.getPresignedUrls(gameId, request.toPresignedUrlQuery());
+
+        return ApiResponse.success(new PresignedUrlListResponseDto(
+                presignedUrlListResult.gameId(),
+                presignedUrlListResult.presignedUrls().stream()
+                        .map(url -> new PresignedUrlListResponseDto.PresignedUrlDto(
+                                url.imageName(),
+                                url.questionOrder(),
+                                url.url(),
+                                url.key()))
+                        .toList()
+        ));
     }
 
     @PostMapping
