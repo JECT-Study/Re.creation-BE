@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
@@ -89,12 +88,12 @@ class GameApiIntegrationTest {
         gameRepository.saveAll(games);
 
         questions = List.of(
-                createQuestion(games.getFirst().getGameId(), 1, "가장 인기 퀴즈 질문 1", "답변 1"),
-                createQuestion(games.getFirst().getGameId(), 2, "가장 인기 퀴즈 질문 2", "답변 2"),
-                createQuestion(games.getFirst().getGameId(), 3, "가장 인기 퀴즈 질문 3", "답변 3"),
-                createQuestion(games.getFirst().getGameId(), 4, "가장 인기 퀴즈 질문 4", "답변 4"),
-                createQuestion(games.getFirst().getGameId(), 5, "가장 인기 퀴즈 질문 5", "답변 5"),
-                createQuestion(games.getFirst().getGameId(), 6, "가장 인기 퀴즈 질문 6", "답변 6")
+                createQuestion(games.getFirst(), 1, "가장 인기 퀴즈 질문 1", "답변 1"),
+                createQuestion(games.getFirst(), 2, "가장 인기 퀴즈 질문 2", "답변 2"),
+                createQuestion(games.getFirst(), 3, "가장 인기 퀴즈 질문 3", "답변 3"),
+                createQuestion(games.getFirst(), 4, "가장 인기 퀴즈 질문 4", "답변 4"),
+                createQuestion(games.getFirst(), 5, "가장 인기 퀴즈 질문 5", "답변 5"),
+                createQuestion(games.getFirst(), 6, "가장 인기 퀴즈 질문 6", "답변 6")
         );
         questionRepository.saveAll(questions);
     }
@@ -332,9 +331,9 @@ class GameApiIntegrationTest {
         return game;
     }
 
-    private QuestionEntity createQuestion(UUID gameId, int questionOrder, String questionText, String questionAnswer) {
+    private QuestionEntity createQuestion(GameEntity game, int questionOrder, String questionText, String questionAnswer) {
         QuestionEntity question = new QuestionEntity();
-        question.setGameId(gameId);
+        question.setGame(game);
         question.setQuestionOrder(questionOrder);
         question.setImageUrl("http://image.url/question");
         question.setQuestionText(questionText);
