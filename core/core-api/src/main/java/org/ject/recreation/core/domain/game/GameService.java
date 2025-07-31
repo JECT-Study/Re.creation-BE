@@ -107,6 +107,7 @@ public class GameService {
         return "성공적으로 수정되었습니다.";
     }
 
+    @Transactional
     public String playGame(UUID gameId) {
         GameEntity existingGame = gameRepository.findById(gameId)
                 .orElseThrow(() -> new CoreException(ErrorType.GAME_NOT_FOUND));
