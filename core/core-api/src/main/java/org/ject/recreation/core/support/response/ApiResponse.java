@@ -30,6 +30,10 @@ public class ApiResponse<S> {
         return new ApiResponse<>(ResultType.ERROR, null, new ErrorMessage(error, errorData));
     }
 
+    public static <S> ApiResponse<S> errorTyped(ErrorType error) {
+        return new ApiResponse<>(ResultType.ERROR, null, new ErrorMessage(error));
+    }
+
     public ResultType getResult() {
         return result;
     }
