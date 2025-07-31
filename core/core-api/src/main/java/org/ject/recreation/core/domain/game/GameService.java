@@ -1,5 +1,6 @@
 package org.ject.recreation.core.domain.game;
 
+import lombok.RequiredArgsConstructor;
 import org.ject.recreation.S3PresignedUrl;
 import org.ject.recreation.S3PresignedUrlManager;
 import org.ject.recreation.core.domain.game.upload.PresignedUrlListResult;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Collectors;
