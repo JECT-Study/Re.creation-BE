@@ -2,16 +2,20 @@ package org.ject.recreation.storage.db.core;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
+@Table(name = "`user`")
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "`user`")
 @Getter
+@Builder
 public class UserEntity {
     @Id
     @Column(nullable = false, length = 255)
@@ -31,4 +35,7 @@ public class UserEntity {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    private List<GameEntity> games = new ArrayList<>();
 } 

@@ -7,8 +7,9 @@ pluginManagement {
 
 rootProject.name = 'recreation'
 
-include 'core:core-enum'
 include 'core:core-api'
+include 'core:core-enum'
+include 'core:core-dto'
 include 'storage:db-core'
 include 'support:logging'
 include 'clients:s3-client'

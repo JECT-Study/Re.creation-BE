@@ -342,4 +342,3 @@ class GameApiIntegrationTest {
         return question;
     }
 }
-

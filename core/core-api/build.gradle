@@ -3,10 +3,12 @@ jar.enabled = false
 
 dependencies {
     implementation project(":core:core-enum")
+    implementation project(':core:core-dto')
     implementation project(":support:logging")
     implementation project(":storage:db-core")
     implementation project(":clients:s3-client")
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
