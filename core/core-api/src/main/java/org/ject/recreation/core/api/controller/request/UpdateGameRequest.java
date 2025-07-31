@@ -38,6 +38,7 @@ public class UpdateGameRequest {
         existingGame.setGameCreator(user);
         existingGame.setGameThumbnailUrl(gameThumbnailUrl);
         existingGame.setVersion(version);
+        existingGame.setQuestionCount(questions.size());
 
         // 기존 질문 리스트를 클리어하고 새로운 질문들로 교체
         existingGame.getQuestions().clear();
