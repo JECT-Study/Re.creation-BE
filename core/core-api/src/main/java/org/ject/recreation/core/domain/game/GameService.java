@@ -187,5 +187,21 @@ public class GameService {
 
         gameWriter.deleteGame(game);
     }
+
+    @Transactional
+    public void shareGame(UUID gameId) {
+        Game game = gameReader.getGameByGameId(gameId);
+        // TODO: 게임 권한 소지 여부 확인 로직 추가
+
+        gameWriter.shareGame(game);
+    }
+
+    @Transactional
+    public void unShareGame(UUID gameId) {
+        Game game = gameReader.getGameByGameId(gameId);
+        // TODO: 게임 권한 소지 여부 확인 로직 추가
+
+        gameWriter.unShareGame(game);
+    }
   
 }

@@ -8,7 +8,9 @@ public enum ErrorType {
     DEFAULT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.E500, "An unexpected error has occurred.",
             LogLevel.ERROR),
     GAME_NOT_FOUND(HttpStatus.NOT_FOUND, ErrorCode.E404, "해당 게임이 존재하지 않습니다.", LogLevel.WARN),
+    GAME_IS_DELETED(HttpStatus.NOT_FOUND, ErrorCode.E404, "삭제된 게임입니다.", LogLevel.WARN),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, ErrorCode.E401, "로그인이 필요합니다.", LogLevel.WARN);
+
     private final HttpStatus status;
 
     private final ErrorCode code;

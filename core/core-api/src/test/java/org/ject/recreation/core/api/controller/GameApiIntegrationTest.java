@@ -376,6 +376,115 @@ class GameApiIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("게임 공유/비공유 API 테스트")
+    class GameShareApiTest {
+        @BeforeEach
+        void setUp() {
+            setHeaders();
+        }
+
+        @Test
+        void 게임_공유_시_공유상태로_변경된다() {
+            UUID gameId = games.getFirst().getGameId();
+
+            ResponseEntity<ApiResponse<Void>> response = restTemplate.exchange(
+                    "/games/" + gameId + "/share",
+                    HttpMethod.POST,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameEntity sharedGame = gameRepository.findById(gameId).orElse(null);
+            assertThat(sharedGame).isNotNull();
+            assertThat(sharedGame.isShared()).isTrue();
+        }
+
+        @Test
+        void 게임_비공유_시_비공유상태로_변경된다() {
+            UUID gameId = games.getFirst().getGameId(); // 비공유 게임
+
+            ResponseEntity<ApiResponse<Void>> response = restTemplate.exchange(
+                    "/games/" + gameId + "/unshare",
+                    HttpMethod.POST,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameEntity unsharedGame = gameRepository.findById(gameId).orElse(null);
+            assertThat(unsharedGame).isNotNull();
+            assertThat(unsharedGame.isShared()).isFalse();
+        }
+
+        @Test
+        void 없는_게임을_공유하려고_하면_404가_발생한다() {
+            UUID nonExistentGameId = UUID.randomUUID();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + nonExistentGameId + "/share",
+                    HttpMethod.POST,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+
+        @Test
+        void 없는_게임을_비공유하려고_하면_404가_발생한다() {
+            UUID nonExistentGameId = UUID.randomUUID();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + nonExistentGameId + "/unshare",
+                    HttpMethod.POST,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+
+        @Test
+        void 삭제된_게임을_공유하려고_하면_404가_발생한다() {
+            UUID deletedGameId = games.stream()
+                    .filter(GameEntity::isDeleted)
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("삭제된 게임이 없습니다."))
+                    .getGameId();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + deletedGameId + "/share",
+                    HttpMethod.POST,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+
+        @Test
+        void 삭제된_게임을_비공유하려고_하면_404가_발생한다() {
+            UUID deletedGameId = games.stream()
+                    .filter(GameEntity::isDeleted)
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("삭제된 게임이 없습니다."))
+                    .getGameId();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + deletedGameId + "/unshare",
+                    HttpMethod.POST,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+    }
+
     private GameEntity createGame(String title, UserEntity user, long playCount, boolean isShared, boolean isDeleted) {
         GameEntity game = new GameEntity();
 

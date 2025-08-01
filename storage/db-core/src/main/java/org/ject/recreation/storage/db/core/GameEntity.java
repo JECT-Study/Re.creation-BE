@@ -93,4 +93,12 @@ public class GameEntity extends BaseEntity {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
     }
+
+    public void share() {
+        this.isShared = true;
+    }
+
+    public void unShare() {
+        this.isShared = false;
+    }
 }
