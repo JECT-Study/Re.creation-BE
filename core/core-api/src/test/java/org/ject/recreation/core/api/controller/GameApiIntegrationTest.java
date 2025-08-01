@@ -3,6 +3,7 @@ package org.ject.recreation.core.api.controller;
 import org.ject.recreation.core.api.controller.request.PresignedUrlListRequestDto;
 import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
+import org.ject.recreation.core.api.controller.response.MyGameListResponseDto;
 import org.ject.recreation.core.api.controller.response.PresignedUrlListResponseDto;
 import org.ject.recreation.core.support.response.ApiResponse;
 import org.ject.recreation.storage.db.core.*;
@@ -45,7 +46,9 @@ class GameApiIntegrationTest {
 
     private HttpHeaders headers;
 
-    private UserEntity user;
+    private UserEntity me;
+
+    private UserEntity otherUser;
 
     private List<GameEntity> games;
 
@@ -53,37 +56,46 @@ class GameApiIntegrationTest {
 
     @BeforeEach
     void initializeData() {
-        user = new UserEntity(
+        me = new UserEntity(
                 "test@example.com",
                 "kakao",
                 "http://image.url/question",
-                "테스트유저",
+                "테스트유저1",
                 LocalDateTime.now(),
                 LocalDateTime.now()
         );
-        userRepository.save(user);
+        otherUser = new UserEntity(
+                "test2@google.com",
+                "kakao",
+                "http://image.url/question",
+                "테스트유저2",
+                LocalDateTime.now(),
+                LocalDateTime.now()
+        );
+        userRepository.save(me);
+        userRepository.save(otherUser);
 
         games = List.of(
-                createGame("가장 인기 퀴즈", user, 400,true, false),
-                createGame("OX 퀴즈", user, 310, true, false),
-                createGame("O/X 퀴즈", user, 300, true, false),
-                createGame("인물 퀴즈 2", user, 250, true, false),
-                createGame("최근 업데이트 퀴즈", user, 210, true, false),
-                createGame("영화 명대사 퀴즈  1", user, 200, true, false),
-                createGame("영화 명대사 퀴즈  2 (비공유)", user, 200, false, false),
-                createGame("연상 퀴즈", user, 180, true, false),
-                createGame("지구과학 퀴즈 1 (삭제)", user, 150, true, true),
-                createGame("지구과학 퀴즈 2 (삭제)", user, 150, true, true),
-                createGame("한국사 퀴즈", user, 120, true, false),
-                createGame("지구과학 퀴즈 3 (비공유)", user, 110, false, false),
-                createGame("인물 퀴즈 1 (삭제)", user, 100, true, true),
-                createGame("인물 퀴즈 2 (비공유 삭제)", user, 95, false, true),
-                createGame("수학 퀴즈", user, 90, true, false),
-                createGame("세계사 퀴즈", user, 80,  true, false),
-                createGame("영어 퀴즈", user, 70, true, false),
-                createGame("과학 퀴즈", user, 60, true, false),
-                createGame("영화 명대사 퀴즈 3", user, 50, true, false),
-                createGame("랜덤 퀴즈", user, 50, true, false)
+                createGame("가장 인기 퀴즈", me, 400,true, false),
+                createGame("OX 퀴즈", me, 310, true, false),
+                createGame("O/X 퀴즈", me, 300, true, false),
+                createGame("인물 퀴즈 2", me, 250, true, false),
+                createGame("최근 업데이트 퀴즈", me, 210, true, false),
+                createGame("영화 명대사 퀴즈  1", me, 200, true, false),
+                createGame("영화 명대사 퀴즈  2 (비공유)", me, 200, false, false),
+                createGame("연상 퀴즈", me, 180, true, false),
+                createGame("지구과학 퀴즈 1 (삭제)", me, 150, true, true),
+                createGame("지구과학 퀴즈 2 (삭제)", me, 150, true, true),
+                createGame("한국사 퀴즈", otherUser, 120, true, false),
+                createGame("지구과학 퀴즈 3 (비공유)", otherUser, 110, false, false),
+                createGame("인물 퀴즈 1 (삭제)", otherUser, 100, true, true),
+                createGame("인물 퀴즈 2 (비공유 삭제)", otherUser, 95, false, true),
+                createGame("수학 퀴즈", otherUser, 90, true, false),
+                createGame("세계사 퀴즈", otherUser, 80,  true, false),
+                createGame("영어 퀴즈", otherUser, 70, true, false),
+                createGame("과학 퀴즈", otherUser, 60, true, false),
+                createGame("영화 명대사 퀴즈 3", otherUser, 50, true, false),
+                createGame("랜덤 퀴즈", otherUser, 50, true, false)
         );
         gameRepository.saveAll(games);
 
@@ -482,6 +494,123 @@ class GameApiIntegrationTest {
             );
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Nested
+    @DisplayName("내 게임 목록 조회 API 테스트")
+    class MyGameListApiTest {
+        @BeforeEach
+        void setUp() {
+            setHeaders();
+        }
+
+        @Test
+        void 내_게임_목록_조회시_내_게임만_반환된다() {
+            ResponseEntity<ApiResponse<MyGameListResponseDto>> response = restTemplate.exchange(
+                    "/users/me/games?limit=10",
+                    HttpMethod.GET,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            MyGameListResponseDto myGameListResponse = (MyGameListResponseDto) response.getBody().getData();
+            List<MyGameListResponseDto.MyGameDto> games = myGameListResponse.games();
+
+            assertThat(games).isNotEmpty();
+
+            assertThat(games.stream().allMatch(game -> {
+                GameEntity gameEntity = gameRepository.findById(game.gameId())
+                        .orElseThrow(() -> new RuntimeException("게임을 찾을 수 없습니다."));
+                return gameEntity.getGameCreator().getEmail().equals(me.getEmail());
+            })).isTrue();
+        }
+
+        @Test
+        void 내_게임_목록_조회시_삭제되지_않은_게임만_반환된다() {
+            ResponseEntity<ApiResponse<MyGameListResponseDto>> response = restTemplate.exchange(
+                    "/users/me/games?limit=10",
+                    HttpMethod.GET,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            MyGameListResponseDto myGameListResponse = (MyGameListResponseDto) response.getBody().getData();
+            List<MyGameListResponseDto.MyGameDto> games = myGameListResponse.games();
+
+            assertThat(games).isNotEmpty();
+
+            assertThat(games.stream().allMatch(game -> {
+                GameEntity gameEntity = gameRepository.findById(game.gameId())
+                        .orElseThrow(() -> new RuntimeException("게임을 찾을 수 없습니다."));
+                return gameEntity.isDeleted() == false;
+            })).isTrue();
+        }
+
+        @Test
+        void 내_게임_목록_조회시_최근수정일시_기준_내림차순으로_반환된다() {
+            ResponseEntity<ApiResponse<MyGameListResponseDto>> response = restTemplate.exchange(
+                    "/users/me/games?limit=100",
+                    HttpMethod.GET,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            MyGameListResponseDto myGameListResponse = (MyGameListResponseDto) response.getBody().getData();
+            List<MyGameListResponseDto.MyGameDto> games = myGameListResponse.games();
+
+            assertThat(games).isNotEmpty();
+
+            AtomicBoolean isSorted = new AtomicBoolean(true);
+
+            IntStream.range(0, games.size() - 1).forEach(i -> {
+                MyGameListResponseDto.MyGameDto current = games.get(i);
+                MyGameListResponseDto.MyGameDto next = games.get(i + 1);
+
+                if (!current.updatedAt().isAfter(next.updatedAt())) {
+                    isSorted.set(false);
+                }
+            });
+
+            assertThat(isSorted.get()).isTrue();
+        }
+
+        @Test
+        void 커서기반_페이징_정상작동하고_중복없이_이어서_조회된다() {
+            ResponseEntity<ApiResponse<MyGameListResponseDto>> firstResponse = restTemplate.exchange(
+                    "/users/me/games?limit=4",
+                    HttpMethod.GET,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            MyGameListResponseDto firstMyGameListResponse = (MyGameListResponseDto) firstResponse.getBody().getData();
+            List<MyGameListResponseDto.MyGameDto> firstPageMyGames = firstMyGameListResponse.games();
+            MyGameListResponseDto.MyGameDto last = firstPageMyGames.getLast();
+
+            String url = String.format(
+                    "/users/me/games?cursorUpdatedAt=%s&cursorGameId=%s&limit=4",
+                    last.updatedAt(),
+                    last.gameId()
+            );
+
+            ResponseEntity<ApiResponse<MyGameListResponseDto>> secondResponse = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            MyGameListResponseDto secondMyGameListResponse = (MyGameListResponseDto) secondResponse.getBody().getData();
+            List<MyGameListResponseDto.MyGameDto> secondPageMyGames = secondMyGameListResponse.games();
+
+            assertThat(secondPageMyGames).doesNotContainAnyElementsOf(firstPageMyGames);
         }
     }
 

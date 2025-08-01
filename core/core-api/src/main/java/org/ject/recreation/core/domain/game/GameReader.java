@@ -1,6 +1,7 @@
 package org.ject.recreation.core.domain.game;
 
 import org.ject.recreation.core.api.controller.request.CreateGameRequest;
+import org.ject.recreation.core.domain.user.MyGameListCursor;
 import org.ject.recreation.core.support.error.CoreException;
 import org.ject.recreation.core.support.error.ErrorData;
 import org.ject.recreation.storage.db.core.GameEntity;
@@ -29,6 +30,18 @@ public class GameReader {
                 cursor.cursorUpdatedAt(),
                 PageRequest.of(0, limit),
                 query
+        );
+        return games.stream()
+                .map(Game::from)
+                .toList();
+    }
+
+    public List<Game> getMyGameList(MyGameListCursor cursor, int limit, String email) {
+        List<GameEntity> games = gameRepository.findGamesWithEmailAndCursor(
+                cursor.cursorGameId(),
+                cursor.cursorUpdatedAt(),
+                email,
+                PageRequest.of(0, limit)
         );
         return games.stream()
                 .map(Game::from)
