@@ -7,6 +7,8 @@ import org.ject.recreation.core.api.controller.response.PresignedUrlListResponse
 import org.ject.recreation.core.support.response.ApiResponse;
 import org.ject.recreation.storage.db.core.*;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -50,21 +52,7 @@ class GameApiIntegrationTest {
     private List<QuestionEntity> questions;
 
     @BeforeEach
-    void setUp() {
-        ResponseEntity<String> loginResponse = restTemplate.exchange(
-                "/test/login/kakao",
-                HttpMethod.POST,
-                null,
-                String.class
-        );
-
-        String sessionCookie = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
-        assertThat(sessionCookie).contains("JSESSIONID");
-
-        this.headers = new HttpHeaders();
-        this.headers.add(HttpHeaders.COOKIE, sessionCookie);
-        this.headers.setContentType(MediaType.APPLICATION_JSON);
-
+    void initializeData() {
         user = new UserEntity(
                 "test@example.com",
                 "kakao",
@@ -110,223 +98,240 @@ class GameApiIntegrationTest {
         questionRepository.saveAll(questions);
     }
 
-    @Test
-    void 게임_목록_조회시_삭제되지않고_공유된_게임만_반환된다() {
-        // when
-        ResponseEntity<ApiResponse<GameListResponseDto>> response = restTemplate.exchange(
-                "/games?limit=100",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {}
-        );
+    @Nested
+    @DisplayName("게임 목록 조회 API 테스트")
+    class GameListApiTest {
+        @Test
+        void 게임_목록_조회시_삭제되지않고_공유된_게임만_반환된다() {
+            // when
+            ResponseEntity<ApiResponse<GameListResponseDto>> response = restTemplate.exchange(
+                    "/games?limit=100",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
 
-        // then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        GameListResponseDto gameListResponse = (GameListResponseDto) response.getBody().getData();
-        List<GameListResponseDto.GameDto> games = gameListResponse.games();
+            GameListResponseDto gameListResponse = (GameListResponseDto) response.getBody().getData();
+            List<GameListResponseDto.GameDto> games = gameListResponse.games();
 
-        assertThat(games.stream().anyMatch(game -> game.gameTitle().contains("비공유"))).isFalse();
-        assertThat(games.stream().anyMatch(game -> game.gameTitle().contains("삭제"))).isFalse();
-    }
+            assertThat(games.stream().anyMatch(game -> game.gameTitle().contains("비공유"))).isFalse();
+            assertThat(games.stream().anyMatch(game -> game.gameTitle().contains("삭제"))).isFalse();
+        }
 
-    @Test
-    void 게임_목록_조회시_게임플레이_최근수정일시_게임식별자_순으로_내림차순_정렬되어_반환된다() {
-        // when
-        ResponseEntity<ApiResponse<GameListResponseDto>> response = restTemplate.exchange(
-                "/games?limit=100",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {}
-        );
+        @Test
+        void 게임_목록_조회시_게임플레이_최근수정일시_게임식별자_순으로_내림차순_정렬되어_반환된다() {
+            // when
+            ResponseEntity<ApiResponse<GameListResponseDto>> response = restTemplate.exchange(
+                    "/games?limit=100",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
 
-        // then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        GameListResponseDto gameListResponse = (GameListResponseDto) response.getBody().getData();
-        List<GameListResponseDto.GameDto> games = gameListResponse.games();
+            GameListResponseDto gameListResponse = (GameListResponseDto) response.getBody().getData();
+            List<GameListResponseDto.GameDto> games = gameListResponse.games();
 
-        AtomicBoolean isSorted = new AtomicBoolean(true);
+            AtomicBoolean isSorted = new AtomicBoolean(true);
 
-        IntStream.range(0, games.size() - 1).forEach(i -> {
-            GameListResponseDto.GameDto current = games.get(i);
-            GameListResponseDto.GameDto next = games.get(i + 1);
+            IntStream.range(0, games.size() - 1).forEach(i -> {
+                GameListResponseDto.GameDto current = games.get(i);
+                GameListResponseDto.GameDto next = games.get(i + 1);
 
-            if (current.playCount() > next.playCount()
-                    || current.updatedAt().isAfter(next.updatedAt())
-                    || current.gameId().compareTo(next.gameId()) > 0) {
-                return;
-            }
+                if (current.playCount() > next.playCount()
+                        || current.updatedAt().isAfter(next.updatedAt())
+                        || current.gameId().compareTo(next.gameId()) > 0) {
+                    return;
+                }
 
-            isSorted.set(false);
-        });
-
-        assertThat(isSorted.get()).isTrue();
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {3, 5, 7, 9, 11})
-    void limit_파라미터에_맞춘_개수의_게임만_반환한다(int limit) {
-        // when
-        ResponseEntity<ApiResponse<GameListResponseDto>> response = restTemplate.exchange(
-                "/games?limit=" + limit,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {}
-        );
-
-        // then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        GameListResponseDto gameListResponse = (GameListResponseDto) response.getBody().getData();
-        List<GameListResponseDto.GameDto> games = gameListResponse.games();
-
-        assertThat(games).hasSize(limit);
-    }
-
-    @Test
-    void query_파라미터로_게임명을_포함하는_게임만_조회한다() {
-        // when
-        ResponseEntity<ApiResponse<GameListResponseDto>> response = restTemplate.exchange(
-                "/games?limit=100&query=영화",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {}
-        );
-
-        // then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        GameListResponseDto gameListResponse = (GameListResponseDto) response.getBody().getData();
-        List<GameListResponseDto.GameDto> games = gameListResponse.games();
-
-        assertThat(games).isNotEmpty();
-        assertThat(games).allMatch(game -> game.gameTitle().contains("영화"));
-    }
-
-    @ParameterizedTest
-    @ValueSource(ints = {5, 7, 10})
-    void 커서기반_페이징_정상작동하고_중복없이_이어서_조회된다(int limit) {
-        ResponseEntity<ApiResponse<GameListResponseDto>> firstResponse = restTemplate.exchange(
-                "/games?limit=" + limit,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {}
-        );
-
-        GameListResponseDto firstGameListResponse = (GameListResponseDto) firstResponse.getBody().getData();
-        List<GameListResponseDto.GameDto> firstPageGames = firstGameListResponse.games();
-
-        GameListResponseDto.GameDto last = firstPageGames.getLast();
-
-        String url = String.format(
-                "/games?cursorPlayCount=%d&cursorUpdatedAt=%s&cursorGameId=%s&limit=%d",
-                last.playCount(),
-                last.updatedAt(),
-                last.gameId(),
-                limit
-        );
-        ResponseEntity<ApiResponse<GameListResponseDto>> secondResponse = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {}
-        );
-
-        GameListResponseDto secondGameListResponse = (GameListResponseDto) secondResponse.getBody().getData();
-        List<GameListResponseDto.GameDto> secondPageGames = secondGameListResponse.games();
-
-        assertThat(secondPageGames).doesNotContainAnyElementsOf(firstPageGames);
-    }
-
-    @Test
-    void 게임_정보_상세_조회_시_문제들은_순서대로_정렬되어_반환된다() {
-        UUID gameId = games.getFirst().getGameId();
-
-        // when
-        ResponseEntity<ApiResponse<GameDetailResponseDto>> response = restTemplate.exchange(
-                "/games/" + gameId,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {}
-        );
-
-        // then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-
-        GameDetailResponseDto gameDetailResponse = (GameDetailResponseDto) response.getBody().getData();
-        List<GameDetailResponseDto.QuestionDto> questions = gameDetailResponse.questions();
-
-        assertThat(questions).isNotEmpty();
-
-        AtomicBoolean isSorted = new AtomicBoolean(true);
-
-        IntStream.range(0, questions.size() - 1).forEach(i -> {
-            GameDetailResponseDto.QuestionDto current = questions.get(i);
-            GameDetailResponseDto.QuestionDto next = questions.get(i + 1);
-
-            if (current.questionOrder() >= next.questionOrder()) {
                 isSorted.set(false);
-            }
-        });
+            });
 
-        assertThat(isSorted.get()).isTrue();
+            assertThat(isSorted.get()).isTrue();
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = {3, 5, 7, 9, 11})
+        void limit_파라미터에_맞춘_개수의_게임만_반환한다(int limit) {
+            // when
+            ResponseEntity<ApiResponse<GameListResponseDto>> response = restTemplate.exchange(
+                    "/games?limit=" + limit,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameListResponseDto gameListResponse = (GameListResponseDto) response.getBody().getData();
+            List<GameListResponseDto.GameDto> games = gameListResponse.games();
+
+            assertThat(games).hasSize(limit);
+        }
+
+        @Test
+        void query_파라미터로_게임명을_포함하는_게임만_조회한다() {
+            // when
+            ResponseEntity<ApiResponse<GameListResponseDto>> response = restTemplate.exchange(
+                    "/games?limit=100&query=영화",
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameListResponseDto gameListResponse = (GameListResponseDto) response.getBody().getData();
+            List<GameListResponseDto.GameDto> games = gameListResponse.games();
+
+            assertThat(games).isNotEmpty();
+            assertThat(games).allMatch(game -> game.gameTitle().contains("영화"));
+        }
+
+        @ParameterizedTest
+        @ValueSource(ints = {5, 7, 10})
+        void 커서기반_페이징_정상작동하고_중복없이_이어서_조회된다(int limit) {
+            ResponseEntity<ApiResponse<GameListResponseDto>> firstResponse = restTemplate.exchange(
+                    "/games?limit=" + limit,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            GameListResponseDto firstGameListResponse = (GameListResponseDto) firstResponse.getBody().getData();
+            List<GameListResponseDto.GameDto> firstPageGames = firstGameListResponse.games();
+
+            GameListResponseDto.GameDto last = firstPageGames.getLast();
+
+            String url = String.format(
+                    "/games?cursorPlayCount=%d&cursorUpdatedAt=%s&cursorGameId=%s&limit=%d",
+                    last.playCount(),
+                    last.updatedAt(),
+                    last.gameId(),
+                    limit
+            );
+            ResponseEntity<ApiResponse<GameListResponseDto>> secondResponse = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            GameListResponseDto secondGameListResponse = (GameListResponseDto) secondResponse.getBody().getData();
+            List<GameListResponseDto.GameDto> secondPageGames = secondGameListResponse.games();
+
+            assertThat(secondPageGames).doesNotContainAnyElementsOf(firstPageGames);
+        }
     }
 
-    @Test
-    void 없는_게임_정보를_상세_조회_시_404가_발생한다() throws Exception {
-        UUID gameId = UUID.randomUUID();
+    @Nested
+    @DisplayName("게임 상세 조회 API 테스트")
+    class GameDetailApiTest {
+        @Test
+        void 게임_정보_상세_조회_시_문제들은_순서대로_정렬되어_반환된다() {
+            UUID gameId = games.getFirst().getGameId();
 
-        // when
-        ResponseEntity<?> response = restTemplate.exchange(
-                "/games/" + gameId,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<>() {}
-        );
+            // when
+            ResponseEntity<ApiResponse<GameDetailResponseDto>> response = restTemplate.exchange(
+                    "/games/" + gameId,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
 
-        // then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameDetailResponseDto gameDetailResponse = (GameDetailResponseDto) response.getBody().getData();
+            List<GameDetailResponseDto.QuestionDto> questions = gameDetailResponse.questions();
+
+            assertThat(questions).isNotEmpty();
+
+            AtomicBoolean isSorted = new AtomicBoolean(true);
+
+            IntStream.range(0, questions.size() - 1).forEach(i -> {
+                GameDetailResponseDto.QuestionDto current = questions.get(i);
+                GameDetailResponseDto.QuestionDto next = questions.get(i + 1);
+
+                if (current.questionOrder() >= next.questionOrder()) {
+                    isSorted.set(false);
+                }
+            });
+
+            assertThat(isSorted.get()).isTrue();
+        }
+
+        @Test
+        void 없는_게임_정보를_상세_조회_시_404가_발생한다() throws Exception {
+            UUID gameId = UUID.randomUUID();
+
+            // when
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + gameId,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
     }
 
-    @Test
-    void 게임신규등록_presignedUrl_발급_테스트() {
-        PresignedUrlListRequestDto requestDto = new PresignedUrlListRequestDto(
-                List.of(
-                        new PresignedUrlListRequestDto.PresignedUrlImageDto("test-1.jpg", 0),
-                        new PresignedUrlListRequestDto.PresignedUrlImageDto("test-2.png", 3),
-                        new PresignedUrlListRequestDto.PresignedUrlImageDto("test-3.png", 1)
-                )
-        );
+    @Nested
+    @DisplayName("S3 Presinged URL 발급 API 테스트")
+    class S3PresignedUrlApiTest {
+        @BeforeEach
+        void setUp() {
+            setHeaders();
+        }
 
-        ResponseEntity<ApiResponse<PresignedUrlListResponseDto>> response = restTemplate.exchange(
-                "/games/uploads/urls",
-                HttpMethod.POST,
-                new HttpEntity<>(requestDto, this.headers),
-                new ParameterizedTypeReference<>() {}
-        );
+        @Test
+        void 게임신규등록_presignedUrl_발급_테스트() {
+            PresignedUrlListRequestDto requestDto = new PresignedUrlListRequestDto(
+                    List.of(
+                            new PresignedUrlListRequestDto.PresignedUrlImageDto("test-1.jpg", 0),
+                            new PresignedUrlListRequestDto.PresignedUrlImageDto("test-2.png", 3),
+                            new PresignedUrlListRequestDto.PresignedUrlImageDto("test-3.png", 1)
+                    )
+            );
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+            ResponseEntity<ApiResponse<PresignedUrlListResponseDto>> response = restTemplate.exchange(
+                    "/games/uploads/urls",
+                    HttpMethod.POST,
+                    new HttpEntity<>(requestDto, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
 
-        PresignedUrlListResponseDto presignedUrlListResponse
-                = (PresignedUrlListResponseDto) response.getBody().getData();
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-        assertThat(presignedUrlListResponse.gameId().toString()).isNotBlank();
+            PresignedUrlListResponseDto presignedUrlListResponse
+                    = (PresignedUrlListResponseDto) response.getBody().getData();
 
-        List<PresignedUrlListResponseDto.PresignedUrlDto> presignedUrls
-                = presignedUrlListResponse.presignedUrls();
+            assertThat(presignedUrlListResponse.gameId().toString()).isNotBlank();
 
-        assertThat(presignedUrls).isNotEmpty();
+            List<PresignedUrlListResponseDto.PresignedUrlDto> presignedUrls
+                    = presignedUrlListResponse.presignedUrls();
 
-        IntStream.range(0, requestDto.images().size()).forEach(i -> {
-            PresignedUrlListRequestDto.PresignedUrlImageDto requestImage = requestDto.images().get(i);
-            PresignedUrlListResponseDto.PresignedUrlDto responseImage = presignedUrls.get(i);
+            assertThat(presignedUrls).isNotEmpty();
 
-            assertThat(responseImage.imageName()).isEqualTo(requestImage.imageName());
-            assertThat(responseImage.questionOrder()).isEqualTo(requestImage.questionOrder());
-            assertThat(responseImage.url()).isNotBlank();
-            assertThat(responseImage.key()).isNotBlank();
-        });
+            IntStream.range(0, requestDto.images().size()).forEach(i -> {
+                PresignedUrlListRequestDto.PresignedUrlImageDto requestImage = requestDto.images().get(i);
+                PresignedUrlListResponseDto.PresignedUrlDto responseImage = presignedUrls.get(i);
+
+                assertThat(responseImage.imageName()).isEqualTo(requestImage.imageName());
+                assertThat(responseImage.questionOrder()).isEqualTo(requestImage.questionOrder());
+                assertThat(responseImage.url()).isNotBlank();
+                assertThat(responseImage.key()).isNotBlank();
+            });
+        }
     }
 
     private GameEntity createGame(String title, UserEntity user, long playCount, boolean isShared, boolean isDeleted) {
@@ -351,5 +356,21 @@ class GameApiIntegrationTest {
         question.setQuestionText(questionText);
         question.setQuestionAnswer(questionAnswer);
         return question;
+    }
+
+    public void setHeaders() {
+        ResponseEntity<String> loginResponse = restTemplate.exchange(
+                "/test/login/kakao",
+                HttpMethod.POST,
+                null,
+                String.class
+        );
+
+        String sessionCookie = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+        assertThat(sessionCookie).contains("JSESSIONID");
+
+        this.headers = new HttpHeaders();
+        this.headers.add(HttpHeaders.COOKIE, sessionCookie);
+        this.headers.setContentType(MediaType.APPLICATION_JSON);
     }
 }
