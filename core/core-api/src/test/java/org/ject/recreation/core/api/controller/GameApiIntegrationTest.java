@@ -41,6 +41,8 @@ class GameApiIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    private HttpHeaders headers;
+
     private UserEntity user;
 
     private List<GameEntity> games;
@@ -49,9 +51,19 @@ class GameApiIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
-        gameRepository.deleteAll();
-        questionRepository.deleteAll();
+        ResponseEntity<String> loginResponse = restTemplate.exchange(
+                "/test/login/kakao",
+                HttpMethod.POST,
+                null,
+                String.class
+        );
+
+        String sessionCookie = loginResponse.getHeaders().getFirst(HttpHeaders.SET_COOKIE);
+        assertThat(sessionCookie).contains("JSESSIONID");
+
+        this.headers = new HttpHeaders();
+        this.headers.add(HttpHeaders.COOKIE, sessionCookie);
+        this.headers.setContentType(MediaType.APPLICATION_JSON);
 
         user = new UserEntity(
                 "test@example.com",
@@ -290,7 +302,7 @@ class GameApiIntegrationTest {
         ResponseEntity<ApiResponse<PresignedUrlListResponseDto>> response = restTemplate.exchange(
                 "/games/uploads/urls",
                 HttpMethod.POST,
-                new HttpEntity<>(requestDto),
+                new HttpEntity<>(requestDto, this.headers),
                 new ParameterizedTypeReference<>() {}
         );
 
