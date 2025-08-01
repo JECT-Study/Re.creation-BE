@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 public class GameService {
 
     private final GameReader gameReader;
+    private final GameWriter gameWriter;
     private final QuestionReader questionReader;
     private final S3PresignedUrlManager s3PresignedUrlManager;
     private final UserRepository userRepository;
@@ -177,6 +178,14 @@ public class GameService {
         return GameListResponseDto.builder()
                 .games(gameDtos)
                 .build();
+    }
+
+    @Transactional
+    public void deleteGame(UUID gameId) {
+        Game game = gameReader.getGameByGameId(gameId);
+        // TODO: 게임 권한 소지 여부 확인 로직 추가
+
+        gameWriter.deleteGame(game);
     }
   
 }

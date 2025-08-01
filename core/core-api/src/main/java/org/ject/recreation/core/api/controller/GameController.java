@@ -116,6 +116,12 @@ public class GameController {
         return ApiResponse.success(gameService.updateGame(userInfo, gameId, updateGameRequest));
     }
 
+    @DeleteMapping("/{gameId}")
+    public ApiResponse<Void> deleteGame(@PathVariable UUID gameId) {
+        gameService.deleteGame(gameId);
+        return ApiResponse.success(null);
+    }
+
     @GetMapping("/default")
     public ApiResponse<GameListResponseDto> getDefaultGameList() {
         return ApiResponse.success(gameService.getDefaultGame());

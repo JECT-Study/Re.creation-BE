@@ -334,6 +334,48 @@ class GameApiIntegrationTest {
         }
     }
 
+    @Nested
+    @DisplayName("게임 삭제 API 테스트")
+    class GameDeleteApiTest {
+        @BeforeEach
+        void setUp() {
+            setHeaders();
+        }
+
+        @Test
+        void 게임_삭제시_실제로_삭제되진_않는다() {
+            UUID gameId = games.getFirst().getGameId();
+
+            ResponseEntity<ApiResponse<Void>> response = restTemplate.exchange(
+                    "/games/" + gameId,
+                    HttpMethod.DELETE,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameEntity deletedGame = gameRepository.findById(gameId).orElse(null);
+            assertThat(deletedGame).isNotNull();
+            assertThat(deletedGame.isDeleted()).isTrue();
+            assertThat(deletedGame.getDeletedAt()).isNotNull();
+        }
+
+        @Test
+        void 없는_게임을_삭제하려고_하면_404가_발생한다() {
+            UUID nonExistentGameId = UUID.randomUUID();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + nonExistentGameId,
+                    HttpMethod.DELETE,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+    }
+
     private GameEntity createGame(String title, UserEntity user, long playCount, boolean isShared, boolean isDeleted) {
         GameEntity game = new GameEntity();
 

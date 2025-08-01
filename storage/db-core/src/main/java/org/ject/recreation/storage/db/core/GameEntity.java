@@ -85,4 +85,12 @@ public class GameEntity extends BaseEntity {
         this.questions.add(question);
         question.setGame(this);
     }
+
+    public void softDelete() {
+        if (this.isDeleted) {
+            return;
+        }
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
 }
