@@ -31,6 +31,23 @@ public interface GameRepository extends JpaRepository<GameEntity, UUID> {
             @Param("query") String query
     );
 
+    @Query("""
+        SELECT g FROM GameEntity g
+        WHERE g.isDeleted = false
+        AND g.gameCreator.email = :gameCreatorEmail
+        AND (:cursorUpdatedAt IS NULL
+            OR g.updatedAt < :cursorUpdatedAt
+            OR (g.updatedAt = :cursorUpdatedAt AND g.gameId < :cursorGameId)
+        )
+        ORDER BY g.updatedAt DESC, g.gameId DESC
+    """)
+    List<GameEntity> findGamesWithEmailAndCursor(
+            @Param("cursorGameId") UUID cursorGameId,
+            @Param("cursorUpdatedAt") LocalDateTime cursorUpdatedAt,
+            @Param("gameCreatorEmail") String gameCreatorEmail,
+            Pageable pageable
+    );
+
     // 기본 게임들을 조회하는 메서드
     List<GameEntity> findAllByGameCreatorEmailAndIsDeletedFalse(String gameCreatorEmail);
 }

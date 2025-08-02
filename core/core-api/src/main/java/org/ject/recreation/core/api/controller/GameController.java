@@ -116,6 +116,24 @@ public class GameController {
         return ApiResponse.success(gameService.updateGame(userInfo, gameId, updateGameRequest));
     }
 
+    @DeleteMapping("/{gameId}")
+    public ApiResponse<Void> deleteGame(@PathVariable UUID gameId) {
+        gameService.deleteGame(gameId);
+        return ApiResponse.success(null);
+    }
+
+    @PostMapping("/{gameId}/share")
+    public ApiResponse<Void> shareGame(@PathVariable UUID gameId) {
+        gameService.shareGame(gameId);
+        return ApiResponse.success(null);
+    }
+
+    @PostMapping("/{gameId}/unshare")
+    public ApiResponse<Void> unShareGame(@PathVariable UUID gameId) {
+        gameService.unShareGame(gameId);
+        return ApiResponse.success(null);
+    }
+
     @GetMapping("/default")
     public ApiResponse<GameListResponseDto> getDefaultGameList() {
         return ApiResponse.success(gameService.getDefaultGame());

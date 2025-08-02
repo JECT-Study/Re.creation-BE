@@ -1,5 +1,6 @@
 package org.ject.recreation.core.domain.game;
 
+import lombok.RequiredArgsConstructor;
 import org.ject.recreation.S3PresignedUrl;
 import org.ject.recreation.S3PresignedUrlManager;
 import org.ject.recreation.core.domain.game.upload.PresignedUrlListResult;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Collectors;
@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 public class GameService {
 
     private final GameReader gameReader;
+    private final GameWriter gameWriter;
     private final QuestionReader questionReader;
     private final S3PresignedUrlManager s3PresignedUrlManager;
     private final UserRepository userRepository;
@@ -177,6 +178,30 @@ public class GameService {
         return GameListResponseDto.builder()
                 .games(gameDtos)
                 .build();
+    }
+
+    @Transactional
+    public void deleteGame(UUID gameId) {
+        Game game = gameReader.getGameByGameId(gameId);
+        // TODO: 게임 권한 소지 여부 확인 로직 추가
+
+        gameWriter.deleteGame(game);
+    }
+
+    @Transactional
+    public void shareGame(UUID gameId) {
+        Game game = gameReader.getGameByGameId(gameId);
+        // TODO: 게임 권한 소지 여부 확인 로직 추가
+
+        gameWriter.shareGame(game);
+    }
+
+    @Transactional
+    public void unShareGame(UUID gameId) {
+        Game game = gameReader.getGameByGameId(gameId);
+        // TODO: 게임 권한 소지 여부 확인 로직 추가
+
+        gameWriter.unShareGame(game);
     }
   
 }

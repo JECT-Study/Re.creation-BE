@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
 import org.ject.recreation.core.support.error.ErrorType;
 import org.ject.recreation.core.support.response.ApiResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,6 +19,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
     
     @Bean
     public SessionAuthenticationFilter sessionAuthenticationFilter(UserDetailsService userDetailsService) {
@@ -30,18 +34,26 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/login/kakao/test",
-                                "/login/kakao",
-                                "/games/default",
-                                "/health"
+                .authorizeHttpRequests(auth -> {
+                        auth
+                                .requestMatchers(
+                                        "/login/kakao/test",
+                                        "/login/kakao",
+                                        "/games/default",
+                                        "/health"
                                 ).permitAll()
-                        .requestMatchers(HttpMethod.GET,
-                                "/games", "/games/{gameId}", "/games/{gameId}/plays").permitAll()
-                        .requestMatchers(HttpMethod.POST,
-                                "/games/{gameId}/plays").permitAll()
-                        .anyRequest().authenticated()
+                                .requestMatchers(HttpMethod.GET,
+                                        "/games", "/games/{gameId}").permitAll()
+                                .requestMatchers(HttpMethod.POST,
+                                        "/games/{gameId}/plays").permitAll();
+                                // .anyRequest().authenticated();
+
+                        if ("local".equals(activeProfile)) {
+                            auth.requestMatchers("/test/login/kakao").permitAll();
+                        }
+
+                        auth.anyRequest().authenticated();
+                    }
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
