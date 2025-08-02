@@ -21,7 +21,6 @@ import java.util.UUID;
 public class CreateGameRequest {
     private UUID gameId;
     private String gameTitle;
-    private String gameCreatorEmail;
     private String gameThumbnailUrl;
     private List<QuestionRequest> questions;
 
