@@ -7,7 +7,8 @@ import java.util.UUID;
 
 public record Game(
         UUID gameId,
-        String nickname,
+        String creatorEmail,
+        String creatorNickname,
         String gameTitle,
         String gameThumbnailUrl,
         boolean isShared,
@@ -22,6 +23,7 @@ public record Game(
     public static Game from(GameEntity game) {
         return new Game(
                 game.getGameId(),
+                game.getGameCreator().getEmail(),
                 game.getGameCreator().getNickname(),
                 game.getGameTitle(),
                 game.getGameThumbnailUrl(),

@@ -25,7 +25,7 @@ public class UserController {
     @GetMapping("/me/games")
     public ApiResponse<MyGameListResponseDto> getMyGameList(@SessionUserInfo SessionUserInfoDto userInfo,
                                                             @ModelAttribute MyGameListRequestDto request) {
-        MyGameListResult myGameListResult = userService.getMyGameList(userInfo, request.toMyGameListQuery());
+        MyGameListResult myGameListResult = userService.getMyGameList(userInfo.getEmail(), request.toMyGameListQuery());
 
         return ApiResponse.success(new MyGameListResponseDto(
                 myGameListResult.games().stream()
