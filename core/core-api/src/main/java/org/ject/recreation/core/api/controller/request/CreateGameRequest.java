@@ -43,6 +43,7 @@ public class CreateGameRequest {
                 .gameCreator(user)
                 .gameTitle(gameTitle)
                 .gameThumbnailUrl(gameThumbnailUrl)
+                .questionCount(questions.size())
                 .build();
 
         questions.forEach(questionEntity -> {
