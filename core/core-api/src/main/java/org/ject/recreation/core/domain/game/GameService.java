@@ -18,6 +18,7 @@ import org.ject.recreation.core.support.error.ErrorData;
 import org.ject.recreation.core.support.error.ErrorType;
 import org.ject.recreation.storage.db.core.*;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +27,7 @@ import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Collectors;
 
-import static org.ject.recreation.core.support.error.ErrorType.GAME_FORBIDDEN;
+import static org.ject.recreation.core.support.error.ErrorType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -122,10 +123,16 @@ public class GameService {
                              CreateGameRequest createGameRequest) {
         // 사용자 정보 조회
         UserEntity user = userRepository.findById(userInfo.getEmail())
-                .orElseThrow(() -> new CoreException(ErrorType.UNAUTHORIZED));
+                .orElseThrow(() -> new CoreException(UNAUTHORIZED));
 
         GameEntity gameEntity = createGameRequest.toGameEntity(user);
-        gameRepository.save(gameEntity);
+
+        try {
+            gameRepository.persistOnly(gameEntity);
+        } catch (DataIntegrityViolationException e) {
+            throw new CoreException(GAME_ALREADY_EXISTS, ErrorData.of("gameId", createGameRequest.getGameId()));
+        }
+
         return "성공적으로 저장되었습니다.";
     }
 
@@ -133,10 +140,10 @@ public class GameService {
     public String updateGame(SessionUserInfoDto userInfo, UUID gameId, UpdateGameRequest updateGameRequest) {
         // 사용자 정보 조회
         UserEntity existingUser = userRepository.findById(userInfo.getEmail())
-                .orElseThrow(() -> new CoreException(ErrorType.UNAUTHORIZED));
+                .orElseThrow(() -> new CoreException(UNAUTHORIZED));
 
         UserEntity newUser = userRepository.findById(updateGameRequest.getGameCreatorEmail())
-                .orElseThrow(() -> new CoreException(ErrorType.UNAUTHORIZED));
+                .orElseThrow(() -> new CoreException(UNAUTHORIZED));
 
         // TODO
         // 로그인 user <-> request user
