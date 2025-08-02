@@ -83,7 +83,6 @@ class GameServiceTest {
         createGameRequest = CreateGameRequest.builder()
                 .gameId(gameId)
                 .gameTitle("Test Game")
-                .gameCreatorEmail(sessionUserInfo.getEmail())
                 .gameThumbnailUrl("https://example.com/thumbnail.png")
                 .questions(createQuestionRequests)
                 .build();
