@@ -1,0 +1,41 @@
+name: Generate & Deploy Redoc
+
+on:
+  push:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (LTS v20)
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Determine branch folder
+        id: branch
+        run: |
+          echo "branch_name=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
+
+      - name: Generate Redoc HTML using npx
+        run: |
+          mkdir -p output/${{ steps.branch.outputs.branch_name }}
+          npx @redocly/cli build-docs docs/recreation_api.yaml --output output/${{ steps.branch.outputs.branch_name }}/index.html
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: output
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
