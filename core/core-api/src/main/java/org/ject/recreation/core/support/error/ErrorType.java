@@ -8,6 +8,7 @@ public enum ErrorType {
     DEFAULT_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, ErrorCode.E500, "An unexpected error has occurred.",
             LogLevel.ERROR),
     GAME_ALREADY_EXISTS(HttpStatus.CONFLICT, ErrorCode.E409, "해당 UUID를 사용하는 게임이 이미 존재합니다.", LogLevel.WARN),
+    GAME_IS_UPDATED(HttpStatus.CONFLICT, ErrorCode.E409, "해당 게임의 정보가 변경되었습니다.", LogLevel.WARN),
     GAME_NOT_FOUND(HttpStatus.NOT_FOUND, ErrorCode.E404, "해당 게임이 존재하지 않습니다.", LogLevel.WARN),
     GAME_IS_DELETED(HttpStatus.NOT_FOUND, ErrorCode.E404, "삭제된 게임입니다.", LogLevel.WARN),
     GAME_FORBIDDEN(HttpStatus.FORBIDDEN, ErrorCode.E403, "해당 게임에 대한 권한이 없습니다.", LogLevel.WARN),

@@ -1,6 +1,8 @@
 package org.ject.recreation.core.domain.game;
 
+import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.annotations.OptimisticLock;
 import org.ject.recreation.S3PresignedUrl;
 import org.ject.recreation.S3PresignedUrlManager;
 import org.ject.recreation.core.domain.game.upload.PresignedUrlListResult;
@@ -19,6 +21,7 @@ import org.ject.recreation.core.support.error.ErrorType;
 import org.ject.recreation.storage.db.core.*;
 
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -154,12 +157,23 @@ public class GameService {
             throw new CoreException(GAME_FORBIDDEN, ErrorData.of("gameId", gameId));
         }
 
+        if (updateGameRequest.getVersion() != existingGame.getVersion()) {
+            throw new CoreException(GAME_IS_UPDATED, ErrorData.of("gameId", gameId));
+        }
+
         // 기존 질문들 삭제
         questionRepository.deleteByGame(existingGame);
 
         GameEntity game = updateGameRequest.fromGameEntity(existingUser, existingGame);
 
         gameRepository.save(game);
+
+        try {
+            gameRepository.flush();
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new CoreException(GAME_IS_UPDATED, ErrorData.of("gameId", gameId));
+        }
+
         return "성공적으로 수정되었습니다.";
     }
 
