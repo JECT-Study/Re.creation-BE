@@ -302,6 +302,49 @@ class GameApiIntegrationTest {
     }
 
     @Nested
+    @DisplayName("게임 플레이 API 테스트")
+    class GamePlayApiTest {
+        @Test
+        void 게임_플레이_테스트() {
+            UUID gameId = games.getFirst().getGameId();
+            long initialPlayCount = gameRepository.findById(gameId)
+                    .orElseThrow().getPlayCount();
+
+            // when
+            ResponseEntity<ApiResponse<String>> response = restTemplate.exchange(
+                    "/games/" + gameId + "/plays",
+                    HttpMethod.POST,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            long updatedPlayCount = gameRepository.findById(gameId)
+                    .orElseThrow().getPlayCount();
+
+            assertThat(updatedPlayCount).isEqualTo(initialPlayCount + 1);
+        }
+
+        @Test
+        void 없는_게임을_플레이하려고_하면_404가_발생한다() {
+            UUID nonExistentGameId = UUID.randomUUID();
+
+            // when
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + nonExistentGameId + "/plays",
+                    HttpMethod.POST,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            // then
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @Nested
     @DisplayName("S3 Presinged URL 발급 API 테스트")
     class S3PresignedUrlApiTest {
 
