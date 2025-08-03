@@ -341,6 +341,7 @@ class GameApiIntegrationTest {
 
             List<PresignedUrlListResponseDto.PresignedUrlDto> presignedUrls
                     = presignedUrlListResponse.presignedUrls();
+            UUID gameId = presignedUrlListResponse.gameId();
 
             assertThat(presignedUrls).isNotEmpty();
 
@@ -352,7 +353,57 @@ class GameApiIntegrationTest {
                 assertThat(responseImage.questionOrder()).isEqualTo(requestImage.questionOrder());
                 assertThat(responseImage.url()).isNotBlank();
                 assertThat(responseImage.key()).isNotBlank();
+                assertThat(responseImage.key().startsWith("games/" + gameId)).isTrue();
             });
+        }
+
+        @Test
+        void 기존게임수정_presignedUrl_발급_테스트() {
+            UUID gameId = games.getFirst().getGameId();
+
+            ResponseEntity<ApiResponse<PresignedUrlListResponseDto>> response = restTemplate.exchange(
+                    "/games/" + gameId + "/uploads/urls",
+                    HttpMethod.POST,
+                    new HttpEntity<>(presignedUrlListRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            PresignedUrlListResponseDto presignedUrlListResponse
+                    = (PresignedUrlListResponseDto) response.getBody().getData();
+
+            assertThat(presignedUrlListResponse.gameId()).isEqualTo(gameId);
+
+            List<PresignedUrlListResponseDto.PresignedUrlDto> presignedUrls
+                    = presignedUrlListResponse.presignedUrls();
+
+            assertThat(presignedUrls).isNotEmpty();
+
+            IntStream.range(0, presignedUrlListRequest.images().size()).forEach(i -> {
+                PresignedUrlListRequestDto.PresignedUrlImageDto requestImage = presignedUrlListRequest.images().get(i);
+                PresignedUrlListResponseDto.PresignedUrlDto responseImage = presignedUrls.get(i);
+
+                assertThat(responseImage.imageName()).isEqualTo(requestImage.imageName());
+                assertThat(responseImage.questionOrder()).isEqualTo(requestImage.questionOrder());
+                assertThat(responseImage.url()).isNotBlank();
+                assertThat(responseImage.key()).isNotBlank();
+                assertThat(responseImage.key().startsWith("games/" + gameId)).isTrue();
+            });
+        }
+
+        @Test
+        void 없는_게임에_대해_presignedUrl_발급을_요청하면_404가_발생한다() {
+            UUID nonExistentGameId = UUID.randomUUID();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + nonExistentGameId + "/uploads/urls",
+                    HttpMethod.POST,
+                    new HttpEntity<>(presignedUrlListRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
     }
 
