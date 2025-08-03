@@ -21,15 +21,12 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
@@ -393,6 +390,24 @@ class GameApiIntegrationTest {
         }
 
         @Test
+        void 내가_만들지_않은_게임에_대해_presignedUrl_발급을_요청하면_403이_발생한다() {
+            UUID otherUserGameId = games.stream()
+                    .filter(game -> !game.getGameCreator().getEmail().equals(me.getEmail()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("다른 사용자의 게임이 없습니다."))
+                    .getGameId();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + otherUserGameId + "/uploads/urls",
+                    HttpMethod.POST,
+                    new HttpEntity<>(presignedUrlListRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        }
+
+        @Test
         void 없는_게임에_대해_presignedUrl_발급을_요청하면_404가_발생한다() {
             UUID nonExistentGameId = UUID.randomUUID();
 
@@ -432,6 +447,24 @@ class GameApiIntegrationTest {
             assertThat(deletedGame).isNotNull();
             assertThat(deletedGame.isDeleted()).isTrue();
             assertThat(deletedGame.getDeletedAt()).isNotNull();
+        }
+
+        @Test
+        void 내가_만들지_않은_게임을_삭제하려고_하면_403이_발생한다() {
+            UUID otherUserGameId = games.stream()
+                    .filter(game -> !game.getGameCreator().getEmail().equals(me.getEmail()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("다른 사용자의 게임이 없습니다."))
+                    .getGameId();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + otherUserGameId,
+                    HttpMethod.DELETE,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         }
 
         @Test
@@ -491,6 +524,42 @@ class GameApiIntegrationTest {
             GameEntity unsharedGame = gameRepository.findById(gameId).orElse(null);
             assertThat(unsharedGame).isNotNull();
             assertThat(unsharedGame.isShared()).isFalse();
+        }
+
+        @Test
+        void 내가_만들지_않은_게임을_공유하려고_하면_403이_발생한다() {
+            UUID otherUserGameId = games.stream()
+                    .filter(game -> !game.getGameCreator().getEmail().equals(me.getEmail()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("다른 사용자의 게임이 없습니다."))
+                    .getGameId();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + otherUserGameId + "/share",
+                    HttpMethod.POST,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        }
+
+        @Test
+        void 내가_만들지_않은_게임을_비공유하려고_하면_403이_발생한다() {
+            UUID otherUserGameId = games.stream()
+                    .filter(game -> !game.getGameCreator().getEmail().equals(me.getEmail()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("다른 사용자의 게임이 없습니다."))
+                    .getGameId();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + otherUserGameId + "/unshare",
+                    HttpMethod.POST,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
         }
 
         @Test
@@ -672,6 +741,42 @@ class GameApiIntegrationTest {
             List<MyGameListResponseDto.MyGameDto> secondPageMyGames = secondMyGameListResponse.games();
 
             assertThat(secondPageMyGames).doesNotContainAnyElementsOf(firstPageMyGames);
+        }
+
+        @Test
+        void cursor로_준_게임이_내가_만들지_않은_게임이라면_403을_반환한다() {
+            LocalDateTime cursorUpdatedAt = LocalDateTime.now().plusDays(1); // 미래의 시간으로 설정
+            UUID otherUserGameId = games.stream()
+                    .filter(game -> !game.getGameCreator().getEmail().equals(me.getEmail()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("다른 사용자의 게임이 없습니다."))
+                    .getGameId();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    String.format("/users/me/games?cursorUpdatedAt=%s&cursorGameId=%s&limit=10",
+                            cursorUpdatedAt, otherUserGameId),
+                    HttpMethod.GET,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        }
+
+        @Test
+        void cursor로_준_게임이_없으면_404를_반환한다() {
+            LocalDateTime cursorUpdatedAt = LocalDateTime.now().plusDays(1); // 미래의 시간으로 설정
+            UUID cursorGameId = UUID.randomUUID(); // 존재하지 않는 게임 ID
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    String.format("/users/me/games?cursorUpdatedAt=%s&cursorGameId=%s&limit=10",
+                            cursorUpdatedAt, cursorGameId),
+                    HttpMethod.GET,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
     }
 
