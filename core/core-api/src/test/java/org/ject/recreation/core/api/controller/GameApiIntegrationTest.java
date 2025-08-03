@@ -1,5 +1,6 @@
 package org.ject.recreation.core.api.controller;
 
+import org.ject.recreation.core.api.controller.request.CreateGameRequest;
 import org.ject.recreation.core.api.controller.request.PresignedUrlListRequestDto;
 import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
@@ -19,6 +20,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -611,6 +613,77 @@ class GameApiIntegrationTest {
             List<MyGameListResponseDto.MyGameDto> secondPageMyGames = secondMyGameListResponse.games();
 
             assertThat(secondPageMyGames).doesNotContainAnyElementsOf(firstPageMyGames);
+        }
+    }
+
+    @Nested
+    @DisplayName("게임 생성 API 테스트")
+    class GameCreateApiTest {
+        private CreateGameRequest createGameRequest;
+
+        @BeforeEach
+        void setUp() {
+            setHeaders();
+            createGameRequest = CreateGameRequest.builder()
+                    .gameId(UUID.randomUUID())
+                    .gameTitle("NEW GAME")
+                    .gameThumbnailUrl("http://thumbnail.url/test-game")
+                    .questions(List.of(
+                            new CreateGameRequest.QuestionRequest("http://image.url/question1", 0, "질문 1", "답변 1"),
+                            new CreateGameRequest.QuestionRequest("http://image.url/question2", 1, "질문 2", "답변 2"),
+                            new CreateGameRequest.QuestionRequest("http://image.url/question3", 2, "질문 3", "답변 3")
+                    ))
+                    .build();
+        }
+
+        @Test
+        void 게임_생성_테스트() {
+            ResponseEntity<ApiResponse<String>> response = restTemplate.exchange(
+                    "/games",
+                    HttpMethod.POST,
+                    new HttpEntity<>(createGameRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameEntity createdGame = gameRepository.findById(createGameRequest.getGameId())
+                    .orElseThrow(() -> new RuntimeException("게임을 찾을 수 없습니다."));
+
+            assertThat(createdGame).isNotNull();
+            assertThat(createdGame.getGameTitle()).isEqualTo(createGameRequest.getGameTitle());
+            assertThat(createdGame.getGameThumbnailUrl()).isEqualTo(createGameRequest.getGameThumbnailUrl());
+            assertThat(createdGame.getGameCreator().getEmail()).isEqualTo(me.getEmail());
+            assertThat(createdGame.isShared()).isFalse(); // 기본값은 false
+            assertThat(createdGame.isDeleted()).isFalse(); // 기본값은 false
+            assertThat(createdGame.getPlayCount()).isEqualTo(0); // 기본값은 0
+            assertThat(createdGame.getQuestionCount()).isEqualTo(createGameRequest.getQuestions().size());
+
+            List<QuestionEntity> createdQuestions = questionRepository.findByGameOrderByQuestionOrder(createdGame);
+
+            IntStream.range(0, createGameRequest.getQuestions().size()).forEach(i -> {
+                CreateGameRequest.QuestionRequest questionRequest = createGameRequest.getQuestions().get(i);
+                QuestionEntity createdQuestion = createdQuestions.get(i);
+
+                assertThat(createdQuestion.getImageUrl()).isEqualTo(questionRequest.getImageUrl());
+                assertThat(createdQuestion.getQuestionOrder()).isEqualTo(questionRequest.getQuestionOrder());
+                assertThat(createdQuestion.getQuestionText()).isEqualTo(questionRequest.getQuestionText());
+                assertThat(createdQuestion.getQuestionAnswer()).isEqualTo(questionRequest.getQuestionAnswer());
+            });
+        }
+
+        @Test
+        void 이미_존재하는_gameId로_게임을_생성하려고_하면_409를_반환한다() {
+            createGameRequest.setGameId(games.getFirst().getGameId());
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games",
+                    HttpMethod.POST,
+                    new HttpEntity<>(createGameRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         }
     }
 
