@@ -307,25 +307,28 @@ class GameApiIntegrationTest {
     @Nested
     @DisplayName("S3 Presinged URL 발급 API 테스트")
     class S3PresignedUrlApiTest {
+
+        private PresignedUrlListRequestDto presignedUrlListRequest;
+
         @BeforeEach
         void setUp() {
             setHeaders();
-        }
 
-        @Test
-        void 게임신규등록_presignedUrl_발급_테스트() {
-            PresignedUrlListRequestDto requestDto = new PresignedUrlListRequestDto(
+            presignedUrlListRequest = new PresignedUrlListRequestDto(
                     List.of(
                             new PresignedUrlListRequestDto.PresignedUrlImageDto("test-1.jpg", 0),
                             new PresignedUrlListRequestDto.PresignedUrlImageDto("test-2.png", 3),
                             new PresignedUrlListRequestDto.PresignedUrlImageDto("test-3.png", 1)
                     )
             );
+        }
 
+        @Test
+        void 게임신규등록_presignedUrl_발급_테스트() {
             ResponseEntity<ApiResponse<PresignedUrlListResponseDto>> response = restTemplate.exchange(
                     "/games/uploads/urls",
                     HttpMethod.POST,
-                    new HttpEntity<>(requestDto, headers),
+                    new HttpEntity<>(presignedUrlListRequest, headers),
                     new ParameterizedTypeReference<>() {}
             );
 
@@ -341,8 +344,8 @@ class GameApiIntegrationTest {
 
             assertThat(presignedUrls).isNotEmpty();
 
-            IntStream.range(0, requestDto.images().size()).forEach(i -> {
-                PresignedUrlListRequestDto.PresignedUrlImageDto requestImage = requestDto.images().get(i);
+            IntStream.range(0, presignedUrlListRequest.images().size()).forEach(i -> {
+                PresignedUrlListRequestDto.PresignedUrlImageDto requestImage = presignedUrlListRequest.images().get(i);
                 PresignedUrlListResponseDto.PresignedUrlDto responseImage = presignedUrls.get(i);
 
                 assertThat(responseImage.imageName()).isEqualTo(requestImage.imageName());
