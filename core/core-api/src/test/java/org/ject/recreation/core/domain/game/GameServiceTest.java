@@ -107,6 +107,7 @@ class GameServiceTest {
     @Test
     @DisplayName("게임 저장")
     void createGame() {
+        createGameRequest.setGameId(UUID.randomUUID());
         String game = gameService.createGame(sessionUserInfo, createGameRequest);
         assertNotNull(game);
     }
@@ -119,7 +120,7 @@ class GameServiceTest {
         @DisplayName("게임 제목 수정")
         void updateGameTitle() {
             // 1. 먼저 게임을 생성
-            createGame();
+            // createGame();
 
             // 2. 제목만 수정
             updateGameRequest.setGameTitle("Updated Game Title");
@@ -139,7 +140,7 @@ class GameServiceTest {
         @DisplayName("게임 썸네일 URL 수정")
         void updateGameThumbnail() {
             // 1. 먼저 게임을 생성
-            createGame();
+            // createGame();
 
             // 2. 썸네일 URL 수정
             updateGameRequest.setGameThumbnailUrl("https://example.com/new-thumbnail.png");
@@ -159,7 +160,7 @@ class GameServiceTest {
         @DisplayName("게임 문제 수정")
         void updateGameQuestions() {
             // 1. 먼저 게임을 생성
-            createGame();
+            // createGame();
 
             // 2. 문제 리스트 수정
             updateQuestionRequests.get(0).setQuestionText("0번 질문 수정됨");
@@ -193,7 +194,7 @@ class GameServiceTest {
         @DisplayName("게임 제목과 문제 동시 수정")
         void updateGameTitleAndQuestions() {
             // 1. 먼저 게임을 생성
-            createGame();
+            // createGame();
 
             // 2. 제목과 문제 동시 수정
             updateGameRequest.setGameTitle("제목과 문제 동시 수정");
@@ -233,7 +234,7 @@ class GameServiceTest {
         @DisplayName("존재하지 않는 사용자로 게임 수정 시 예외 발생")
         void updateGameWithNonExistentUser() {
             // 1. 먼저 게임을 생성
-            createGame();
+            // createGame();
 
             // 2. 존재하지 않는 사용자 이메일로 수정 시도
             updateGameRequest.setGameCreatorEmail("nonexistent@example.com");
