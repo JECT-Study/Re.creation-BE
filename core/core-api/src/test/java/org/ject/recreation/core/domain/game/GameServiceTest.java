@@ -75,7 +75,6 @@ class GameServiceTest {
                     .questionOrder(i)
                     .questionText("Test " + i)
                     .questionAnswer("Test " + i)
-                    .version(1)
                     .build();
             updateQuestionRequests.add(build);
         }
@@ -89,7 +88,6 @@ class GameServiceTest {
 
         updateGameRequest = UpdateGameRequest.builder()
                 .gameTitle("Test Game")
-                .gameCreatorEmail(sessionUserInfo.getEmail())
                 .gameThumbnailUrl("https://example.com/thumbnail.png")
                 .version(1)
                 .questions(updateQuestionRequests)
@@ -227,20 +225,6 @@ class GameServiceTest {
             
             assertThrows(CoreException.class, () -> {
                 gameService.updateGame(sessionUserInfo, nonExistentGameId, updateGameRequest);
-            });
-        }
-
-        @Test
-        @DisplayName("존재하지 않는 사용자로 게임 수정 시 예외 발생")
-        void updateGameWithNonExistentUser() {
-            // 1. 먼저 게임을 생성
-            // createGame();
-
-            // 2. 존재하지 않는 사용자 이메일로 수정 시도
-            updateGameRequest.setGameCreatorEmail("nonexistent@example.com");
-            
-            assertThrows(CoreException.class, () -> {
-                gameService.updateGame(sessionUserInfo, gameId, updateGameRequest);
             });
         }
     }
