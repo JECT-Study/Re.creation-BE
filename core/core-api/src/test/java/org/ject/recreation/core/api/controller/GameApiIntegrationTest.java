@@ -2,6 +2,7 @@ package org.ject.recreation.core.api.controller;
 
 import org.ject.recreation.core.api.controller.request.CreateGameRequest;
 import org.ject.recreation.core.api.controller.request.PresignedUrlListRequestDto;
+import org.ject.recreation.core.api.controller.request.UpdateGameRequest;
 import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
 import org.ject.recreation.core.api.controller.response.MyGameListResponseDto;
@@ -23,8 +24,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
 
@@ -685,6 +690,151 @@ class GameApiIntegrationTest {
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         }
+    }
+
+    @Nested
+    @DisplayName("게임 수정 API 테스트")
+    class GameUpdateApiTest {
+
+        private UUID gameId;
+        private UpdateGameRequest updateGameRequest;
+
+        @BeforeEach
+        void setUp() {
+            setHeaders();
+
+            gameId = games.getFirst().getGameId(); // 수정할 게임 ID 설정
+            updateGameRequest = UpdateGameRequest.builder()
+                    .gameTitle("UPDATE GAME")
+                    .gameThumbnailUrl("http://thumbnail.url/updated-game")
+                    .version(1)
+                    .questions(List.of(
+                            new UpdateGameRequest.UpdateQuestionRequest("http://image.url/question1", 0, "수정된 질문 1", "수정된 답변 1"),
+                            new UpdateGameRequest.UpdateQuestionRequest("http://image.url/question2", 1, "수정된 질문 2", "수정된 답변 2"),
+                            new UpdateGameRequest.UpdateQuestionRequest("http://image.url/question3", 2, "수정된 질문 3", "수정된 답변 3"),
+                            new UpdateGameRequest.UpdateQuestionRequest("http://image.url/question4", 3, "수정된 질문 4", "수정된 답변 4")
+                    ))
+                    .build();
+        }
+
+        @Test
+        void 게임_수정_테스트() {
+            ResponseEntity<ApiResponse<String>> response = restTemplate.exchange(
+                    "/games/" + gameId,
+                    HttpMethod.PUT,
+                    new HttpEntity<>(updateGameRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameEntity updatedGame = gameRepository.findById(gameId)
+                    .orElseThrow(() -> new RuntimeException("게임을 찾을 수 없습니다."));
+
+            assertThat(updatedGame).isNotNull();
+            assertThat(updatedGame.getGameTitle()).isEqualTo(updateGameRequest.getGameTitle());
+            assertThat(updatedGame.getGameThumbnailUrl()).isEqualTo(updateGameRequest.getGameThumbnailUrl());
+            assertThat(updatedGame.getQuestionCount()).isEqualTo(updateGameRequest.getQuestions().size());
+
+            List<QuestionEntity> updatedQuestions = questionRepository.findByGameOrderByQuestionOrder(updatedGame);
+
+            IntStream.range(0, updateGameRequest.getQuestions().size()).forEach(i -> {
+                UpdateGameRequest.UpdateQuestionRequest questionRequest = updateGameRequest.getQuestions().get(i);
+                QuestionEntity updatedQuestion = updatedQuestions.get(i);
+
+                assertThat(updatedQuestion.getImageUrl()).isEqualTo(questionRequest.getImageUrl());
+                assertThat(updatedQuestion.getQuestionOrder()).isEqualTo(questionRequest.getQuestionOrder());
+                assertThat(updatedQuestion.getQuestionText()).isEqualTo(questionRequest.getQuestionText());
+                assertThat(updatedQuestion.getQuestionAnswer()).isEqualTo(questionRequest.getQuestionAnswer());
+            });
+        }
+
+        @Test
+        void 내가_만들지_않은_게임을_수정하려고_하면_403을_반환한다() {
+            UUID otherUserGameId = games.stream()
+                    .filter(game -> !game.getGameCreator().getEmail().equals(me.getEmail()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("다른 사용자의 게임이 없습니다."))
+                    .getGameId();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + otherUserGameId,
+                    HttpMethod.PUT,
+                    new HttpEntity<>(updateGameRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.FORBIDDEN);
+        }
+
+        @Test
+        void 없는_게임을_수정하려고_하면_404를_반환한다() {
+            UUID nonExistentGameId = UUID.randomUUID();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + nonExistentGameId,
+                    HttpMethod.PUT,
+                    new HttpEntity<>(updateGameRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+
+        @Test
+        void 게임_수정시_예전_버전을_사용하면_409를_반환한다() {
+            ResponseEntity<ApiResponse<String>> firstResponse = restTemplate.exchange(
+                    "/games/" + gameId,
+                    HttpMethod.PUT,
+                    new HttpEntity<>(updateGameRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(firstResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            ResponseEntity<?> secondResponse = restTemplate.exchange(
+                    "/games/" + gameId,
+                    HttpMethod.PUT,
+                    new HttpEntity<>(updateGameRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(secondResponse.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        }
+
+        @Test
+        void 게임_수정을_동시에_시도하면_하나만_성공한다() throws InterruptedException {
+            int THREAD_COUNT = 10;
+            List<HttpStatusCode> statuses = new ArrayList<>();
+            CountDownLatch startLatch = new CountDownLatch(1);
+            CountDownLatch doneLatch = new CountDownLatch(THREAD_COUNT);
+
+            for (int i = 0; i < THREAD_COUNT; i++) {
+                Thread thread = new Thread(() -> {
+                    try {
+                        ResponseEntity<?> response = restTemplate.exchange(
+                                "/games/" + gameId,
+                                HttpMethod.PUT,
+                                new HttpEntity<>(updateGameRequest, headers),
+                                new ParameterizedTypeReference<>() {}
+                        );
+                        statuses.add(response.getStatusCode());
+                    } finally {
+                        doneLatch.countDown();
+                    }
+
+                });
+
+                thread.start();
+            }
+
+            startLatch.countDown();
+            doneLatch.await();
+
+            assertThat(statuses.stream().filter(status -> status == HttpStatus.OK).count()).isEqualTo(1);
+            assertThat(statuses.stream().filter(status -> status == HttpStatus.CONFLICT).count()).isEqualTo(THREAD_COUNT - 1);
+        }
+
     }
 
     private GameEntity createGame(String title, UserEntity user, long playCount, boolean isShared, boolean isDeleted) {
