@@ -1,8 +1,6 @@
 package org.ject.recreation.core.domain.game;
 
-import jakarta.persistence.OptimisticLockException;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.annotations.OptimisticLock;
 import org.ject.recreation.S3PresignedUrl;
 import org.ject.recreation.S3PresignedUrlManager;
 import org.ject.recreation.core.domain.game.upload.PresignedUrlListResult;
@@ -44,7 +42,6 @@ public class GameService {
     private final GameRepository gameRepository;
     private final QuestionRepository questionRepository;
 
-    @Transactional(readOnly = true)
     public GameListResult getGameList(GameListQuery gameListQuery) {
         List<Game> games = gameReader.getGameList(
                 gameListQuery.toGameListCursor(),
@@ -62,7 +59,6 @@ public class GameService {
                 .toList());
     }
 
-    @Transactional(readOnly = true)
     public GameDetailResult getGameDetail(UUID gameId) {
         Game game = gameReader.getGameByGameId(gameId);
         List<Question> questions = questionReader.getQuestionsByGameId(gameId);
