@@ -142,9 +142,6 @@ public class GameService {
         UserEntity existingUser = userRepository.findById(userInfo.getEmail())
                 .orElseThrow(() -> new CoreException(UNAUTHORIZED));
 
-        UserEntity newUser = userRepository.findById(updateGameRequest.getGameCreatorEmail())
-                .orElseThrow(() -> new CoreException(UNAUTHORIZED));
-
         // TODO
         // 로그인 user <-> request user
         // 다중 편집 <- 권한?

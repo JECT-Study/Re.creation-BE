@@ -15,7 +15,6 @@ import java.util.List;
 @Builder
 public class UpdateGameRequest {
     private String gameTitle;
-    private String gameCreatorEmail;
     private String gameThumbnailUrl;
     private int version;
     private List<UpdateQuestionRequest> questions;
@@ -30,7 +29,6 @@ public class UpdateGameRequest {
         private int questionOrder;
         private String questionText;
         private String questionAnswer;
-        private int version;
     }
 
     public GameEntity fromGameEntity(UserEntity user, GameEntity existingGame) {
@@ -49,7 +47,6 @@ public class UpdateGameRequest {
                     .questionText(questionRequest.getQuestionText())
                     .questionAnswer(questionRequest.getQuestionAnswer())
                     .imageUrl(questionRequest.getImageUrl())
-                    .version(questionRequest.getVersion())
                     .game(existingGame)
                     .build();
             existingGame.getQuestions().add(newQuestion);
