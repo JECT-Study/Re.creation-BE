@@ -14,9 +14,12 @@ import org.ject.recreation.core.domain.game.question.Question;
 import org.ject.recreation.core.domain.game.question.QuestionReader;
 import org.ject.recreation.core.domain.game.question.QuestionResult;
 import org.ject.recreation.core.support.error.CoreException;
+import org.ject.recreation.core.support.error.ErrorData;
 import org.ject.recreation.core.support.error.ErrorType;
 import org.ject.recreation.storage.db.core.*;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +27,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Collectors;
+
+import static org.ject.recreation.core.support.error.ErrorType.*;
 
 @Service
 @RequiredArgsConstructor
@@ -37,7 +42,6 @@ public class GameService {
     private final GameRepository gameRepository;
     private final QuestionRepository questionRepository;
 
-    @Transactional(readOnly = true)
     public GameListResult getGameList(GameListQuery gameListQuery) {
         List<Game> games = gameReader.getGameList(
                 gameListQuery.toGameListCursor(),
@@ -55,14 +59,13 @@ public class GameService {
                 .toList());
     }
 
-    @Transactional(readOnly = true)
     public GameDetailResult getGameDetail(UUID gameId) {
         Game game = gameReader.getGameByGameId(gameId);
         List<Question> questions = questionReader.getQuestionsByGameId(gameId);
 
         return new GameDetailResult(
                 game.gameTitle(),
-                game.nickname(),
+                game.creatorNickname(),
                 game.questionCount(),
                 game.version(),
                 questions.stream()
@@ -81,9 +84,12 @@ public class GameService {
         return generatePresignedUrls(UUID.randomUUID(), presignedUrlQuery);
     }
 
-    public PresignedUrlListResult getPresignedUrls(UUID gameId, PresignedUrlQuery presignedUrlQuery) {
+    public PresignedUrlListResult getPresignedUrls(String curUserEmail, UUID gameId, PresignedUrlQuery presignedUrlQuery) {
         Game game = gameReader.getGameByGameId(gameId);
-        // TODO: 게임 권한 소지 여부 확인 로직 추가
+
+        if (!game.creatorEmail().equals(curUserEmail)) {
+            throw new CoreException(GAME_FORBIDDEN, ErrorData.of("gameId", gameId));
+        }
 
         return generatePresignedUrls(gameId, presignedUrlQuery);
     }
@@ -116,10 +122,16 @@ public class GameService {
                              CreateGameRequest createGameRequest) {
         // 사용자 정보 조회
         UserEntity user = userRepository.findById(userInfo.getEmail())
-                .orElseThrow(() -> new CoreException(ErrorType.UNAUTHORIZED));
+                .orElseThrow(() -> new CoreException(UNAUTHORIZED));
 
         GameEntity gameEntity = createGameRequest.toGameEntity(user);
-        gameRepository.save(gameEntity);
+
+        try {
+            gameRepository.persistOnly(gameEntity);
+        } catch (DataIntegrityViolationException e) {
+            throw new CoreException(GAME_ALREADY_EXISTS, ErrorData.of("gameId", createGameRequest.getGameId()));
+        }
+
         return "성공적으로 저장되었습니다.";
     }
 
@@ -127,10 +139,7 @@ public class GameService {
     public String updateGame(SessionUserInfoDto userInfo, UUID gameId, UpdateGameRequest updateGameRequest) {
         // 사용자 정보 조회
         UserEntity existingUser = userRepository.findById(userInfo.getEmail())
-                .orElseThrow(() -> new CoreException(ErrorType.UNAUTHORIZED));
-
-        UserEntity newUser = userRepository.findById(updateGameRequest.getGameCreatorEmail())
-                .orElseThrow(() -> new CoreException(ErrorType.UNAUTHORIZED));
+                .orElseThrow(() -> new CoreException(UNAUTHORIZED));
 
         // TODO
         // 로그인 user <-> request user
@@ -140,12 +149,27 @@ public class GameService {
         GameEntity existingGame = gameRepository.findById(gameId)
                 .orElseThrow(() -> new CoreException(ErrorType.GAME_NOT_FOUND));
 
+        if (!existingGame.getGameCreator().getEmail().equals(userInfo.getEmail())) {
+            throw new CoreException(GAME_FORBIDDEN, ErrorData.of("gameId", gameId));
+        }
+
+        if (updateGameRequest.getVersion() != existingGame.getVersion()) {
+            throw new CoreException(GAME_IS_UPDATED, ErrorData.of("gameId", gameId));
+        }
+
         // 기존 질문들 삭제
         questionRepository.deleteByGame(existingGame);
 
         GameEntity game = updateGameRequest.fromGameEntity(existingUser, existingGame);
 
         gameRepository.save(game);
+
+        try {
+            gameRepository.flush();
+        } catch (ObjectOptimisticLockingFailureException e) {
+            throw new CoreException(GAME_IS_UPDATED, ErrorData.of("gameId", gameId));
+        }
+
         return "성공적으로 수정되었습니다.";
     }
 
@@ -181,25 +205,34 @@ public class GameService {
     }
 
     @Transactional
-    public void deleteGame(UUID gameId) {
+    public void deleteGame(String curUserEmail, UUID gameId) {
         Game game = gameReader.getGameByGameId(gameId);
-        // TODO: 게임 권한 소지 여부 확인 로직 추가
+
+        if (!game.creatorEmail().equals(curUserEmail)) {
+            throw new CoreException(GAME_FORBIDDEN, ErrorData.of("gameId", gameId));
+        }
 
         gameWriter.deleteGame(game);
     }
 
     @Transactional
-    public void shareGame(UUID gameId) {
+    public void shareGame(String curUserEmail, UUID gameId) {
         Game game = gameReader.getGameByGameId(gameId);
-        // TODO: 게임 권한 소지 여부 확인 로직 추가
+
+        if (!game.creatorEmail().equals(curUserEmail)) {
+            throw new CoreException(GAME_FORBIDDEN, ErrorData.of("gameId", gameId));
+        }
 
         gameWriter.shareGame(game);
     }
 
     @Transactional
-    public void unShareGame(UUID gameId) {
+    public void unShareGame(String curUserEmail, UUID gameId) {
         Game game = gameReader.getGameByGameId(gameId);
-        // TODO: 게임 권한 소지 여부 확인 로직 추가
+
+        if (!game.creatorEmail().equals(curUserEmail)) {
+            throw new CoreException(GAME_FORBIDDEN, ErrorData.of("gameId", gameId));
+        }
 
         gameWriter.unShareGame(game);
     }

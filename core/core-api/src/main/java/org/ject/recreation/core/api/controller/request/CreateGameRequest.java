@@ -21,7 +21,6 @@ import java.util.UUID;
 public class CreateGameRequest {
     private UUID gameId;
     private String gameTitle;
-    private String gameCreatorEmail;
     private String gameThumbnailUrl;
     private List<QuestionRequest> questions;
 
@@ -44,6 +43,7 @@ public class CreateGameRequest {
                 .gameCreator(user)
                 .gameTitle(gameTitle)
                 .gameThumbnailUrl(gameThumbnailUrl)
+                .questionCount(questions.size())
                 .build();
 
         questions.forEach(questionEntity -> {

@@ -83,8 +83,10 @@ public class GameController {
     }
 
     @PostMapping("/{gameId}/uploads/urls")
-    public ApiResponse<PresignedUrlListResponseDto> getPresignedUrls(@PathVariable UUID gameId, @RequestBody PresignedUrlListRequestDto request) {
-        PresignedUrlListResult presignedUrlListResult = gameService.getPresignedUrls(gameId, request.toPresignedUrlQuery());
+    public ApiResponse<PresignedUrlListResponseDto> getPresignedUrls(@SessionUserInfo SessionUserInfoDto userInfo,
+                                                                     @PathVariable UUID gameId,
+                                                                     @RequestBody PresignedUrlListRequestDto request) {
+        PresignedUrlListResult presignedUrlListResult = gameService.getPresignedUrls(userInfo.getEmail(), gameId, request.toPresignedUrlQuery());
 
         return ApiResponse.success(new PresignedUrlListResponseDto(
                 presignedUrlListResult.gameId(),
@@ -117,20 +119,23 @@ public class GameController {
     }
 
     @DeleteMapping("/{gameId}")
-    public ApiResponse<Void> deleteGame(@PathVariable UUID gameId) {
-        gameService.deleteGame(gameId);
+    public ApiResponse<Void> deleteGame(@SessionUserInfo SessionUserInfoDto userInfo,
+                                        @PathVariable UUID gameId) {
+        gameService.deleteGame(userInfo.getEmail(), gameId);
         return ApiResponse.success(null);
     }
 
     @PostMapping("/{gameId}/share")
-    public ApiResponse<Void> shareGame(@PathVariable UUID gameId) {
-        gameService.shareGame(gameId);
+    public ApiResponse<Void> shareGame(@SessionUserInfo SessionUserInfoDto userInfo,
+                                       @PathVariable UUID gameId) {
+        gameService.shareGame(userInfo.getEmail(), gameId);
         return ApiResponse.success(null);
     }
 
     @PostMapping("/{gameId}/unshare")
-    public ApiResponse<Void> unShareGame(@PathVariable UUID gameId) {
-        gameService.unShareGame(gameId);
+    public ApiResponse<Void> unShareGame(@SessionUserInfo SessionUserInfoDto userInfo,
+                                         @PathVariable UUID gameId) {
+        gameService.unShareGame(userInfo.getEmail(), gameId);
         return ApiResponse.success(null);
     }
 

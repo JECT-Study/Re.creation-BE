@@ -8,6 +8,7 @@ import org.ject.recreation.storage.db.core.GameEntity;
 import org.ject.recreation.storage.db.core.GameRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ public class GameReader {
         this.gameRepository = gameRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<Game> getGameList(GameListCursor cursor, int limit, String query) {
         List<GameEntity> games = gameRepository.findGamesWithCursorAndQuery(
                 cursor.cursorGameId(),
@@ -36,6 +38,7 @@ public class GameReader {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<Game> getMyGameList(MyGameListCursor cursor, int limit, String email) {
         List<GameEntity> games = gameRepository.findGamesWithEmailAndCursor(
                 cursor.cursorGameId(),
@@ -48,6 +51,7 @@ public class GameReader {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public Game getGameByGameId(UUID gameId) {
         GameEntity gameEntity = gameRepository.findById(gameId)
                 .orElseThrow(() -> new CoreException(GAME_NOT_FOUND, ErrorData.of("gameId", gameId)));

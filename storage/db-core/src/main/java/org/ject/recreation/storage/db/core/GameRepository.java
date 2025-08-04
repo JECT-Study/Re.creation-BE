@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-public interface GameRepository extends JpaRepository<GameEntity, UUID> {
+public interface GameRepository extends JpaRepository<GameEntity, UUID>, InsertOnlyRepository<GameEntity> {
 
     @Query("""
         SELECT g FROM GameEntity g
