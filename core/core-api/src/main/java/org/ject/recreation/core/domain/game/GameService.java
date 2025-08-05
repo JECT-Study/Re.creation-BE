@@ -18,6 +18,7 @@ import org.ject.recreation.core.support.error.ErrorData;
 import org.ject.recreation.core.support.error.ErrorType;
 import org.ject.recreation.storage.db.core.*;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
@@ -42,6 +43,9 @@ public class GameService {
     private final GameRepository gameRepository;
     private final QuestionRepository questionRepository;
 
+    @Value("${prefix.image-prefix}")
+    private String imagePrefix;
+
     public GameListResult getGameList(GameListQuery gameListQuery) {
         List<Game> games = gameReader.getGameList(
                 gameListQuery.toGameListCursor(),
@@ -51,7 +55,7 @@ public class GameService {
         return new GameListResult(games.stream()
                 .map(game -> new GameResult(
                         game.gameId(),
-                        game.gameThumbnailUrl(),
+                        imagePrefix + game.gameThumbnailUrl(),
                         game.gameTitle(),
                         game.questionCount(),
                         game.playCount(),
@@ -72,7 +76,7 @@ public class GameService {
                         .map(question -> new QuestionResult(
                                 question.questionId(),
                                 question.questionOrder(),
-                                question.imageUrl(),
+                                imagePrefix + question.imageUrl(),
                                 question.questionText(),
                                 question.questionAnswer(),
                                 question.version()))
@@ -191,7 +195,7 @@ public class GameService {
         List<GameListResponseDto.GameDto> gameDtos = defaultGames.stream()
                 .map(game -> GameListResponseDto.GameDto.builder()
                         .gameId(game.getGameId())
-                        .gameThumbnail(game.getGameThumbnailUrl())
+                        .gameThumbnail(imagePrefix + game.getGameThumbnailUrl())
                         .gameTitle(game.getGameTitle())
                         .questionCount(game.getQuestionCount())
                         .playCount(game.getPlayCount())
