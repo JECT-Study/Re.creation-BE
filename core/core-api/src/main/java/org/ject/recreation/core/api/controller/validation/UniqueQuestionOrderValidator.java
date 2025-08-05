@@ -11,13 +11,6 @@ import java.util.Set;
 
 public class UniqueQuestionOrderValidator implements ConstraintValidator<UniqueQuestionOrder, HasOrderedItems> {
 
-    private String errorMessage;
-
-    @Override
-    public void initialize(UniqueQuestionOrder constraintAnnotation) {
-        this.errorMessage = constraintAnnotation.message();
-    }
-
     @Override
     public boolean isValid(HasOrderedItems request, ConstraintValidatorContext context) {
         List<? extends HasOrder> questions = request.getOrderedItems();
@@ -28,16 +21,8 @@ public class UniqueQuestionOrderValidator implements ConstraintValidator<UniqueQ
                 .toList();
 
         Set<Integer> uniqueQuestionOrders = new HashSet<>(questionOrders);
-        boolean valid = uniqueQuestionOrders.size() == questionOrders.size();
 
-        if (!valid) {
-            context.disableDefaultConstraintViolation();
-            context.buildConstraintViolationWithTemplate(errorMessage)
-                    .addPropertyNode("questions")
-                    .addConstraintViolation();
-        }
-
-        return valid;
+        return uniqueQuestionOrders.size() == questionOrders.size();
     }
 }
 

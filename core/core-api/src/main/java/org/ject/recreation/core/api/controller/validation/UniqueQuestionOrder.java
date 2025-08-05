@@ -10,7 +10,7 @@ import java.lang.annotation.*;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UniqueQuestionOrder {
-    String message() default "order 값들이 중복됩니다.";
+    String message() default "요소들의 order 값들이 중복됩니다.";
     Class<?>[] groups() default {};
     Class<? extends Payload>[] payload() default {};
 }
