@@ -1,5 +1,6 @@
 package org.ject.recreation.core.api.controller;
 
+import jakarta.validation.Valid;
 import org.ject.recreation.core.api.controller.request.MyGameListRequestDto;
 import org.ject.recreation.core.api.controller.response.MyGameListResponseDto;
 import org.ject.recreation.core.api.controller.session.SessionUserInfo;
@@ -24,7 +25,7 @@ public class UserController {
 
     @GetMapping("/me/games")
     public ApiResponse<MyGameListResponseDto> getMyGameList(@SessionUserInfo SessionUserInfoDto userInfo,
-                                                            @ModelAttribute MyGameListRequestDto request) {
+                                                            @Valid @ModelAttribute MyGameListRequestDto request) {
         MyGameListResult myGameListResult = userService.getMyGameList(userInfo.getEmail(), request.toMyGameListQuery());
 
         return ApiResponse.success(new MyGameListResponseDto(
