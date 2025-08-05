@@ -47,6 +47,10 @@ public class GameService {
     private String imagePrefix;
 
     public GameListResult getGameList(GameListQuery gameListQuery) {
+        if (gameListQuery.cursorGameId() != null) {
+            Game cursorGame = gameReader.getGameByGameId(gameListQuery.cursorGameId());
+        }
+
         List<Game> games = gameReader.getGameList(
                 gameListQuery.toGameListCursor(),
                 gameListQuery.limit(),

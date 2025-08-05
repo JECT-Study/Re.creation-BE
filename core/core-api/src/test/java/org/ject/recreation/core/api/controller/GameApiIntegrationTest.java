@@ -245,6 +245,23 @@ class GameApiIntegrationTest {
 
             assertThat(secondPageGames).doesNotContainAnyElementsOf(firstPageGames);
         }
+
+        @Test
+        void 커서로_없는_게임을_주면_404가_발생한다() {
+            String url = String.format(
+                    "/games?cursorPlayCount=%d&cursorUpdatedAt=%s&cursorGameId=%s&limit=%d",
+                    0, LocalDateTime.now(), UUID.randomUUID(), 10
+            );
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
     }
 
     @Nested
