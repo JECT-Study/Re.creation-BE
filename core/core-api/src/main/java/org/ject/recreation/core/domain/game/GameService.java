@@ -195,7 +195,7 @@ public class GameService {
         List<GameListResponseDto.GameDto> gameDtos = defaultGames.stream()
                 .map(game -> GameListResponseDto.GameDto.builder()
                         .gameId(game.getGameId())
-                        .gameThumbnail(imagePrefix + game.getGameThumbnailUrl())
+                        .gameThumbnailUrl(imagePrefix + game.getGameThumbnailUrl())
                         .gameTitle(game.getGameTitle())
                         .questionCount(game.getQuestionCount())
                         .playCount(game.getPlayCount())
