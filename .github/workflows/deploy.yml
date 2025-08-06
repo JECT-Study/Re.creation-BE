@@ -23,6 +23,17 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build -x test
 
+      - name: Verify JAR file
+        run: |
+          echo "=== JAR 파일 검증 ==="
+          ls -la build/libs/
+          echo "JAR 파일 크기:"
+          ls -lh build/libs/*.jar
+          echo "JAR 파일 내용:"
+          jar -tf build/libs/*.jar | head -20
+          echo "JAR 파일 실행 테스트:"
+          java -jar build/libs/*.jar --version || echo "JAR 파일 실행 실패"
+
       - name: Copy JAR file to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -55,9 +66,17 @@ jobs:
             ls -la
             echo "JAR 파일 크기:"
             ls -lh app.jar || echo "JAR 파일이 없습니다!"
+            echo "JAR 파일 타입 확인:"
+            file app.jar || echo "파일 타입 확인 실패"
             echo "Java 버전:"
             java -version || echo "Java가 설치되지 않았습니다!"
+            echo "JAR 파일 내용 확인:"
+            jar -tf app.jar | head -10 || echo "JAR 파일이 손상되었습니다!"
             echo "=================="
+
+            # JAR 파일 직접 실행 테스트
+            echo "JAR 파일 직접 실행 테스트:"
+            timeout 10s java -jar app.jar --help || echo "JAR 파일 실행 실패"
 
             # 기존 서비스 중지 (실패해도 무시)
             sudo systemctl stop recreation-app || true
@@ -96,6 +115,8 @@ jobs:
             ExecStart=/usr/bin/java -jar app.jar
             Restart=always
             RestartSec=10
+            StandardOutput=journal
+            StandardError=journal
 
             [Install]
             WantedBy=multi-user.target
@@ -106,5 +127,8 @@ jobs:
             sudo systemctl enable recreation-app
             sudo systemctl start recreation-app
 
-            # 상태 확인
+            # 상태 확인 및 로그 출력
+            echo "서비스 상태:"
             sudo systemctl status recreation-app
+            echo "최근 로그:"
+            sudo journalctl -u recreation-app --no-pager -n 20
