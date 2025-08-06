@@ -1,0 +1,92 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main, develop ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build with Gradle
+        run: ./gradlew build -x test
+
+      - name: Create deployment package
+        run: |
+          mkdir -p deployment
+          cp build/libs/*.jar deployment/app.jar
+          # 필요한 경우만 아래 주석 해제
+          # cp src/main/resources/application-secret.yml deployment/
+
+      - name: Copy deployment package to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "deployment/*"
+          target: "/home/ubuntu/app"
+
+      - name: Deploy and restart service on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            # 앱 디렉토리로 이동
+            cd /home/ubuntu/app
+
+            # 기존 서비스 중지 (실패해도 무시)
+            sudo systemctl stop recreation-app || true
+
+            # 환경변수 파일 작성
+            cat > .env << EOF
+            SPRING_PROFILES_ACTIVE=prod
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
+            KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+            KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}
+            AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION=${{ secrets.AWS_REGION }}
+            AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
+            EOF
+
+            # systemd 서비스 등록
+            sudo tee /etc/systemd/system/recreation-app.service > /dev/null << EOF
+            [Unit]
+            Description=Recreation App
+            After=network.target
+
+            [Service]
+            Type=simple
+            User=ubuntu
+            WorkingDirectory=/home/ubuntu/app
+            EnvironmentFile=/home/ubuntu/app/.env
+            ExecStart=/usr/bin/java -jar app.jar
+            Restart=always
+            RestartSec=10
+
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+
+            # 서비스 시작
+            sudo systemctl daemon-reload
+            sudo systemctl enable recreation-app
+            sudo systemctl start recreation-app
