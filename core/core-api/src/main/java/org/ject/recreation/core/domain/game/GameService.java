@@ -23,6 +23,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -80,7 +81,7 @@ public class GameService {
                         .map(question -> new QuestionResult(
                                 question.questionId(),
                                 question.questionOrder(),
-                                imagePrefix + question.imageUrl(),
+                                (question.imageUrl() == null || question.imageUrl().isBlank()) ? null : imagePrefix + question.imageUrl(),
                                 question.questionText(),
                                 question.questionAnswer(),
                                 question.version()))
