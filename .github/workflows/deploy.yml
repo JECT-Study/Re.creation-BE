@@ -39,9 +39,25 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            # Java 설치 확인 및 설치
+            if ! command -v java &> /dev/null; then
+              echo "Java 설치 중..."
+              sudo apt update
+              sudo apt install openjdk-21-jdk -y
+            fi
+
             # 앱 디렉토리 생성
             mkdir -p /home/ubuntu/app
             cd /home/ubuntu/app
+
+            # 디버깅: 파일 존재 여부 확인
+            echo "=== 디버깅 정보 ==="
+            ls -la
+            echo "JAR 파일 크기:"
+            ls -lh app.jar || echo "JAR 파일이 없습니다!"
+            echo "Java 버전:"
+            java -version || echo "Java가 설치되지 않았습니다!"
+            echo "=================="
 
             # 기존 서비스 중지 (실패해도 무시)
             sudo systemctl stop recreation-app || true
@@ -62,6 +78,9 @@ jobs:
             AWS_REGION=${{ secrets.AWS_REGION }}
             AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
             EOF
+
+            # JAR 파일 권한 설정
+            chmod +x app.jar
 
             # systemd 서비스 등록
             sudo tee /etc/systemd/system/recreation-app.service > /dev/null << EOF
