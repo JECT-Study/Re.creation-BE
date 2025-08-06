@@ -23,30 +23,24 @@ jobs:
       - name: Build with Gradle
         run: ./gradlew build -x test
 
-      - name: Create deployment package
-        run: |
-          mkdir -p deployment
-          cp build/libs/*.jar deployment/app.jar
-          # 필요한 경우만 아래 주석 해제
-          # cp src/main/resources/application-secret.yml deployment/
-
-      - name: Copy deployment package to EC2
+      - name: Copy JAR file to EC2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
-          source: "deployment/*"
-          target: "/home/ubuntu/app"
+          source: "build/libs/*.jar"
+          target: "/home/ubuntu/app/app.jar"
 
-      - name: Deploy and restart service on EC2
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            # 앱 디렉토리로 이동
+            # 앱 디렉토리 생성
+            mkdir -p /home/ubuntu/app
             cd /home/ubuntu/app
 
             # 기존 서비스 중지 (실패해도 무시)
@@ -92,3 +86,6 @@ jobs:
             sudo systemctl daemon-reload
             sudo systemctl enable recreation-app
             sudo systemctl start recreation-app
+
+            # 상태 확인
+            sudo systemctl status recreation-app
