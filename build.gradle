@@ -1,8 +1,9 @@
 plugins {
 	id 'java-library'
-	id 'org.springframework.boot' apply false
+	id 'org.springframework.boot' apply(false)
 	id 'io.spring.dependency-management'
 }
+
 
 allprojects {
 	group = "${projectGroup}"
@@ -37,14 +38,8 @@ subprojects {
 		implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	}
 
-	bootJar {
-		enabled = true
-		mainClass = 'org.ject.recreation.CoreApiApplication'
-		archiveFileName = 'app.jar'
-	}
-	jar {
-		enabled = false
-	}
+	bootJar.enabled = false
+	jar.enabled = true
 
 	tasks.named('test') {
 		useJUnitPlatform()
