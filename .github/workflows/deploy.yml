@@ -35,7 +35,7 @@ jobs:
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: "deploy/app.jar"
-          target: "/home/ubuntu/app/app.jar"
+          target: "/home/ubuntu/app/"
 
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.0.3
