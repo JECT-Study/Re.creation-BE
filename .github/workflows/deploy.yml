@@ -59,6 +59,18 @@ jobs:
             # 기존 서비스 중단
             sudo systemctl stop recreation-app || true
 
+            # ✅ 이전에 잘못된 디렉토리 형태로 app.jar가 있다면 제거
+            if [ -d "app.jar" ]; then
+              echo "app.jar가 디렉토리입니다. 삭제합니다."
+              rm -rf app.jar
+            fi
+
+            # ✅ deploy 폴더에 잘못 복사된 경우에도 이동 (백업용)
+            if [ -f "deploy/app.jar" ]; then
+              echo "deploy 폴더에 잘못 복사된 app.jar를 이동합니다."
+              mv deploy/app.jar app.jar
+            fi
+
             # .env 파일 생성
             cat > .env << EOF
             SPRING_PROFILES_ACTIVE=prod
