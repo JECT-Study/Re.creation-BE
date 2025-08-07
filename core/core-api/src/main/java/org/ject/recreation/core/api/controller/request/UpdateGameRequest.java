@@ -1,11 +1,19 @@
 package org.ject.recreation.core.api.controller.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.ject.recreation.core.api.controller.validation.UniqueQuestionOrder;
+import org.ject.recreation.core.api.controller.validation.contract.HasOrder;
+import org.ject.recreation.core.api.controller.validation.contract.HasOrderedItems;
 import org.ject.recreation.storage.db.core.GameEntity;
 import org.ject.recreation.storage.db.core.QuestionEntity;
 import org.ject.recreation.storage.db.core.UserEntity;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -13,22 +21,50 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UpdateGameRequest {
+@UniqueQuestionOrder
+public class UpdateGameRequest implements HasOrderedItems {
+
+    @NotBlank
     private String gameTitle;
+
+    @NotBlank
     private String gameThumbnailUrl;
+
+    @Min(1)
     private int version;
+
+    @NotNull
+    @Size(min = 1)
+    @Valid
     private List<UpdateQuestionRequest> questions;
+
+    @JsonIgnore
+    @Override
+    public List<? extends HasOrder> getOrderedItems() {
+        return questions;
+    }
 
     @Getter
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class UpdateQuestionRequest {
+    public static class UpdateQuestionRequest implements HasOrder {
         private String imageUrl;
+
+        @Min(0)
         private int questionOrder;
+
+        @NotBlank
         private String questionText;
+
+        @NotBlank
         private String questionAnswer;
+
+        @Override
+        public int getOrder() {
+            return questionOrder;
+        }
     }
 
     public GameEntity fromGameEntity(UserEntity user, GameEntity existingGame) {

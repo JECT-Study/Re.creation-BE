@@ -245,6 +245,40 @@ class GameApiIntegrationTest {
 
             assertThat(secondPageGames).doesNotContainAnyElementsOf(firstPageGames);
         }
+
+        @Test
+        void 커서로_없는_게임을_주면_404가_발생한다() {
+            String url = String.format(
+                    "/games?cursorPlayCount=%d&cursorUpdatedAt=%s&cursorGameId=%s&limit=%d",
+                    0, LocalDateTime.now(), UUID.randomUUID(), 10
+            );
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+
+        @Test
+        void 커서필드를_모두_제공하지_않으면_400이_발생한다() {
+            String url = String.format(
+                    "/games?cursorPlayCount=%d&cursorUpdatedAt=%s&limit=%d",
+                    0, LocalDateTime.now(), 10
+            );
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Nested
@@ -463,6 +497,46 @@ class GameApiIntegrationTest {
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
+
+        @Test
+        void 게임신규등록_presignedUrl_발급시_이미지_순서가_중복되면_400이_발생한다() {
+            PresignedUrlListRequestDto invalidRequest = new PresignedUrlListRequestDto(
+                    List.of(
+                            new PresignedUrlListRequestDto.PresignedUrlImageDto("test-1.jpg", 0),
+                            new PresignedUrlListRequestDto.PresignedUrlImageDto("test-2.png", 0) // 중복된 순서
+                    )
+            );
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/uploads/urls",
+                    HttpMethod.POST,
+                    new HttpEntity<>(invalidRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
+
+        @Test
+        void 기존게임수정_presignedUrl_발급시_이미지_순서가_중복되면_400이_발생한다() {
+            UUID gameId = games.getFirst().getGameId();
+
+            PresignedUrlListRequestDto invalidRequest = new PresignedUrlListRequestDto(
+                    List.of(
+                            new PresignedUrlListRequestDto.PresignedUrlImageDto("test-1.jpg", 0),
+                            new PresignedUrlListRequestDto.PresignedUrlImageDto("test-2.png", 0) // 중복된 순서
+                    )
+            );
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + gameId + "/uploads/urls",
+                    HttpMethod.POST,
+                    new HttpEntity<>(invalidRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Nested
@@ -680,6 +754,8 @@ class GameApiIntegrationTest {
 
         @Test
         void 내_게임_목록_조회시_내_게임만_반환된다() {
+            System.out.println("내 게임 목록 조회 테스트 시작");
+
             ResponseEntity<ApiResponse<MyGameListResponseDto>> response = restTemplate.exchange(
                     "/users/me/games?limit=10",
                     HttpMethod.GET,
@@ -821,6 +897,21 @@ class GameApiIntegrationTest {
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         }
+
+        @Test
+        void 커서필드를_모두_제공하지_않으면_400이_발생한다() {
+            LocalDateTime cursorUpdatedAt = LocalDateTime.now().plusDays(1); // 미래의 시간으로 설정
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    String.format("/users/me/games?cursorUpdatedAt=%s&limit=10",
+                            cursorUpdatedAt),
+                    HttpMethod.GET,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Nested
@@ -891,6 +982,28 @@ class GameApiIntegrationTest {
             );
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        }
+
+        @Test
+        void 게임_생성시_문제의_순서가_중복되면_400을_반환한다() {
+            CreateGameRequest invalidRequest = CreateGameRequest.builder()
+                    .gameId(UUID.randomUUID())
+                    .gameTitle("INVALID GAME")
+                    .gameThumbnailUrl("http://thumbnail.url/invalid-game")
+                    .questions(List.of(
+                            new CreateGameRequest.QuestionRequest("http://image.url/question1", 0, "질문 1", "답변 1"),
+                            new CreateGameRequest.QuestionRequest("http://image.url/question2", 0, "질문 2", "답변 2") // 중복된 순서
+                    ))
+                    .build();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games",
+                    HttpMethod.POST,
+                    new HttpEntity<>(invalidRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -1035,6 +1148,28 @@ class GameApiIntegrationTest {
 
             assertThat(statuses.stream().filter(status -> status == HttpStatus.OK).count()).isEqualTo(1);
             assertThat(statuses.stream().filter(status -> status == HttpStatus.CONFLICT).count()).isEqualTo(THREAD_COUNT - 1);
+        }
+
+        @Test
+        void 게임_수정시_문제의_순서가_중복되면_400을_반환한다() {
+            UpdateGameRequest invalidRequest = UpdateGameRequest.builder()
+                    .gameTitle("INVALID UPDATE GAME")
+                    .gameThumbnailUrl("http://thumbnail.url/invalid-updated-game")
+                    .version(1)
+                    .questions(List.of(
+                            new UpdateGameRequest.UpdateQuestionRequest("http://image.url/question1", 0, "수정된 질문 1", "수정된 답변 1"),
+                            new UpdateGameRequest.UpdateQuestionRequest("http://image.url/question2", 0, "수정된 질문 2", "수정된 답변 2") // 중복된 순서
+                    ))
+                    .build();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + gameId,
+                    HttpMethod.PUT,
+                    new HttpEntity<>(invalidRequest, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         }
 
     }

@@ -8,3 +8,6 @@ spring:
       - logging.yml
       - secret.yml
   web.resources.add-mappings: false
+
+prefix:
+  image-prefix: https://creationre.s3.ap-northeast-2.amazonaws.com/

@@ -1,5 +1,6 @@
 package org.ject.recreation.core.api.controller;
 
+import jakarta.validation.Valid;
 import org.ject.recreation.core.api.controller.request.CreateGameRequest;
 import org.ject.recreation.core.api.controller.request.GameListRequestDto;
 import org.ject.recreation.core.api.controller.request.PresignedUrlListRequestDto;
@@ -29,13 +30,14 @@ public class GameController {
     }
 
     @GetMapping
-    public ApiResponse<GameListResponseDto> getGameList(@ModelAttribute GameListRequestDto request) {
+    public ApiResponse<GameListResponseDto> getGameList(@Valid @ModelAttribute GameListRequestDto request) {
         GameListResult gameListResult = gameService.getGameList(request.toGameListQuery());
+
         return ApiResponse.success(new GameListResponseDto(
                 gameListResult.games().stream()
                         .map(game -> new GameListResponseDto.GameDto(
                                 game.gameId(),
-                                game.gameThumbnail(),
+                                game.gameThumbnailUrl(),
                                 game.gameTitle(),
                                 game.questionCount(),
                                 game.playCount(),
@@ -67,7 +69,7 @@ public class GameController {
     }
 
     @PostMapping("/uploads/urls")
-    public ApiResponse<PresignedUrlListResponseDto> getPresignedUrls(@RequestBody PresignedUrlListRequestDto request) {
+    public ApiResponse<PresignedUrlListResponseDto> getPresignedUrls(@Valid @RequestBody PresignedUrlListRequestDto request) {
         PresignedUrlListResult presignedUrlListResult = gameService.getPresignedUrls(request.toPresignedUrlQuery());
 
         return ApiResponse.success(new PresignedUrlListResponseDto(
@@ -85,7 +87,7 @@ public class GameController {
     @PostMapping("/{gameId}/uploads/urls")
     public ApiResponse<PresignedUrlListResponseDto> getPresignedUrls(@SessionUserInfo SessionUserInfoDto userInfo,
                                                                      @PathVariable UUID gameId,
-                                                                     @RequestBody PresignedUrlListRequestDto request) {
+                                                                     @Valid @RequestBody PresignedUrlListRequestDto request) {
         PresignedUrlListResult presignedUrlListResult = gameService.getPresignedUrls(userInfo.getEmail(), gameId, request.toPresignedUrlQuery());
 
         return ApiResponse.success(new PresignedUrlListResponseDto(
@@ -102,7 +104,7 @@ public class GameController {
 
     @PostMapping
     public ApiResponse<String> createGame(@SessionUserInfo SessionUserInfoDto userInfo,
-                                     @RequestBody CreateGameRequest createGameRequest) {
+                                          @Valid @RequestBody CreateGameRequest createGameRequest) {
         return ApiResponse.success(gameService.createGame(userInfo, createGameRequest));
     }
 
@@ -113,8 +115,8 @@ public class GameController {
 
     @PutMapping("/{gameId}")
     public ApiResponse<String> updateGame(@SessionUserInfo SessionUserInfoDto userInfo,
-                                 @PathVariable UUID gameId,
-                                 @RequestBody UpdateGameRequest updateGameRequest) {
+                                          @PathVariable UUID gameId,
+                                          @Valid @RequestBody UpdateGameRequest updateGameRequest) {
         return ApiResponse.success(gameService.updateGame(userInfo, gameId, updateGameRequest));
     }
 
