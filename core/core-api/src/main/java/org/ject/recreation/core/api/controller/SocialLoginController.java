@@ -2,6 +2,7 @@ package org.ject.recreation.core.api.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.ject.recreation.core.api.controller.request.SocialLoginRequestDto;
 import org.ject.recreation.core.api.controller.response.SocialLoginResponseDto;
@@ -29,7 +30,7 @@ public class SocialLoginController {
     private String kakaoRedirectUri;
 
     @PostMapping("/login/kakao")
-    public ApiResponse<SocialLoginResponseDto> login(@RequestBody SocialLoginRequestDto request, HttpSession session) {
+    public ApiResponse<SocialLoginResponseDto> login(@Valid @RequestBody SocialLoginRequestDto request, HttpSession session) {
         try {
             SocialLoginResponseDto response = socialLoginService.loginWithKakao(request);
             if (response.getEmail() != null) {

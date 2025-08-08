@@ -5,7 +5,7 @@ import java.util.UUID;
 
 public record GameResult(
         UUID gameId,
-        String gameThumbnail,
+        String gameThumbnailUrl,
         String gameTitle,
         int questionCount,
         long playCount,
