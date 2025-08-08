@@ -101,7 +101,7 @@ jobs:
             User=ubuntu
             WorkingDirectory=/home/ubuntu/app
             EnvironmentFile=/home/ubuntu/app/.env
-            ExecStart=/usr/bin/java -jar /home/ubuntu/app/app.jar
+            ExecStart=/usr/bin/java -Dspring.profiles.active=prod -jar /home/ubuntu/app/app.jar
             Restart=always
             RestartSec=10
             StandardOutput=journal
