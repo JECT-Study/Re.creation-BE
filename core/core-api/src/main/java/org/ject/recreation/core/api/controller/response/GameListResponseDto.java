@@ -13,7 +13,7 @@ public record GameListResponseDto(
     @Builder
     public record GameDto(
             UUID gameId,
-            String gameThumbnail,
+            String gameThumbnailUrl,
             String gameTitle,
             int questionCount,
             long playCount,

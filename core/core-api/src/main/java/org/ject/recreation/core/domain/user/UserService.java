@@ -6,6 +6,7 @@ import org.ject.recreation.core.domain.game.Game;
 import org.ject.recreation.core.domain.game.GameReader;
 import org.ject.recreation.core.support.error.CoreException;
 import org.ject.recreation.core.support.error.ErrorData;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,9 @@ import static org.ject.recreation.core.support.error.ErrorType.GAME_FORBIDDEN;
 public class UserService {
 
     private final GameReader gameReader;
+
+    @Value("${prefix.image-prefix}")
+    private String imagePrefix;
 
     @Transactional(readOnly = true)
     public MyGameListResult getMyGameList(String curUserEmail, MyGameListQuery myGameListQuery) {
@@ -38,7 +42,7 @@ public class UserService {
         return new MyGameListResult(myGames.stream()
                 .map(game -> new MyGameListResult.MyGameResult(
                         game.gameId(),
-                        game.gameThumbnailUrl(),
+                        imagePrefix + game.gameThumbnailUrl(),
                         game.gameTitle(),
                         game.questionCount(),
                         game.isShared(),
