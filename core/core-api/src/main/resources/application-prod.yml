@@ -1,0 +1,22 @@
+spring.application.name: core-api
+
+spring:
+  config:
+    import:
+      - db-core.yml
+      - logging.yml
+      - optional:classpath:secret.yml
+  web.resources.add-mappings: false
+
+# 프로덕션 환경에서는 보안을 위해 민감한 정보는 환경변수로 관리
+kakao:
+  client-id: ${KAKAO_CLIENT_ID}
+  redirect-uri: ${KAKAO_REDIRECT_URI}
+  client-secret: ${KAKAO_CLIENT_SECRET}
+
+aws:
+  s3:
+    bucket: ${AWS_S3_BUCKET}
+    region: ${AWS_REGION}
+    access-key: ${AWS_ACCESS_KEY}
+    secret-key: ${AWS_SECRET_KEY} 
