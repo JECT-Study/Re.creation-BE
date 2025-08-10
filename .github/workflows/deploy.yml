@@ -1,0 +1,123 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Build with Gradle
+        run: ./gradlew clean bootJar -x test
+
+      - name: Rename JAR for deployment
+        run: |
+          mkdir -p deploy
+          cp core/core-api/build/libs/*.jar deploy/app.jar
+
+      - name: Copy JAR to EC2
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: "deploy/app.jar"
+          target: "/home/ubuntu/app/"
+
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            echo "=== 배포 스크립트 시작 ==="
+
+            # Java 설치 확인
+            if ! java -version &> /dev/null; then
+              echo "Java 설치 중..."
+              sudo apt update && sudo apt install -y openjdk-21-jdk
+            fi
+
+            # 디렉토리 준비
+            mkdir -p /home/ubuntu/app
+            cd /home/ubuntu/app
+
+            # 기존 서비스 중단
+            sudo systemctl stop recreation-app || true
+
+            # ✅ 이전에 잘못된 디렉토리 형태로 app.jar가 있다면 제거
+            if [ -d "app.jar" ]; then
+              echo "app.jar가 디렉토리입니다. 삭제합니다."
+              rm -rf app.jar
+            fi
+
+            # ✅ deploy 폴더에 잘못 복사된 경우에도 이동 (백업용)
+            if [ -f "deploy/app.jar" ]; then
+              echo "deploy 폴더에 잘못 복사된 app.jar를 이동합니다."
+              mv deploy/app.jar app.jar
+            fi
+
+            # .env 파일 생성
+            cat > .env << EOF
+            SPRING_PROFILES_ACTIVE=prod
+            DB_HOST=${{ secrets.DB_HOST }}
+            DB_PORT=${{ secrets.DB_PORT }}
+            DB_NAME=${{ secrets.DB_NAME }}
+            DB_USERNAME=${{ secrets.DB_USERNAME }}
+            DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            KAKAO_CLIENT_ID=${{ secrets.KAKAO_CLIENT_ID }}
+            KAKAO_CLIENT_SECRET=${{ secrets.KAKAO_CLIENT_SECRET }}
+            KAKAO_REDIRECT_URI=${{ secrets.KAKAO_REDIRECT_URI }}
+            AWS_ACCESS_KEY=${{ secrets.AWS_ACCESS_KEY_ID }}
+            AWS_SECRET_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            AWS_REGION=${{ secrets.AWS_REGION }}
+            AWS_S3_BUCKET=${{ secrets.AWS_S3_BUCKET }}
+            EOF
+
+            chmod 600 .env
+
+            # systemd 서비스 파일 등록
+            sudo tee /etc/systemd/system/recreation-app.service > /dev/null << EOF
+            [Unit]
+            Description=Recreation App
+            After=network.target
+
+            [Service]
+            Type=simple
+            User=ubuntu
+            WorkingDirectory=/home/ubuntu/app
+            EnvironmentFile=/home/ubuntu/app/.env
+            ExecStart=/usr/bin/java -Dspring.profiles.active=prod -Duser.timezone=Asia/Seoul -jar /home/ubuntu/app/app.jar
+            Restart=always
+            RestartSec=10
+            StandardOutput=journal
+            StandardError=journal
+
+            [Install]
+            WantedBy=multi-user.target
+            EOF
+
+            # 서비스 시작
+            sudo systemctl daemon-reload
+            sudo systemctl enable recreation-app
+            sudo systemctl restart recreation-app
+
+            echo "=== 서비스 상태 확인 ==="
+            sudo systemctl status recreation-app --no-pager || true
+
+            echo "=== 최근 로그 확인 ==="
+            sudo journalctl -u recreation-app --no-pager -n 30 || true

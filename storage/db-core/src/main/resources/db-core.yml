@@ -31,3 +31,29 @@ storage:
       data-source-properties:
         rewriteBatchedStatements: true
 
+---
+spring.config.activate.on-profile: prod
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: false
+        show_sql: false
+
+storage:
+  datasource:
+    core:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
+      username: ${DB_USERNAME}
+      password: ${DB_PASSWORD}
+      pool-name: core-db-pool
+      data-source-properties:
+        rewriteBatchedStatements: true
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+
