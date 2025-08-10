@@ -10,6 +10,9 @@ spring:
 prefix:
   image-prefix: https://creationre.s3.ap-northeast-2.amazonaws.com/
 
+default-image:
+  game-thumbnail-url: default/default_game_thumbnail.png
+
 
 ---
 spring.config.activate.on-profile: local
@@ -18,4 +21,3 @@ spring:
   config:
     import:
       - optional:classpath:secret.yml
-

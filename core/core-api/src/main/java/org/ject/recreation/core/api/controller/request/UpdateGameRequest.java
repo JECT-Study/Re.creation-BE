@@ -27,7 +27,6 @@ public class UpdateGameRequest implements HasOrderedItems {
     @NotBlank
     private String gameTitle;
 
-    @NotBlank
     private String gameThumbnailUrl;
 
     @Min(1)
@@ -67,10 +66,10 @@ public class UpdateGameRequest implements HasOrderedItems {
         }
     }
 
-    public GameEntity fromGameEntity(UserEntity user, GameEntity existingGame) {
+    public GameEntity fromGameEntity(UserEntity user, String resolvedGameThumbnailUrl, GameEntity existingGame) {
         existingGame.setGameTitle(gameTitle);
         existingGame.setGameCreator(user);
-        existingGame.setGameThumbnailUrl(gameThumbnailUrl);
+        existingGame.setGameThumbnailUrl(resolvedGameThumbnailUrl);
         existingGame.setVersion(version);
         existingGame.setQuestionCount(questions.size());
 

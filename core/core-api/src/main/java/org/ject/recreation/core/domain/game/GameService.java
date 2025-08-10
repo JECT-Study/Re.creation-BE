@@ -23,7 +23,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -46,6 +45,9 @@ public class GameService {
 
     @Value("${prefix.image-prefix}")
     private String imagePrefix;
+
+    @Value("${default-image.game-thumbnail-url}")
+    private String defaultGameThumbnailUrl;
 
     public GameListResult getGameList(GameListQuery gameListQuery) {
         if (gameListQuery.cursorGameId() != null) {
@@ -133,7 +135,12 @@ public class GameService {
         UserEntity user = userRepository.findById(userInfo.getEmail())
                 .orElseThrow(() -> new CoreException(UNAUTHORIZED));
 
-        GameEntity gameEntity = createGameRequest.toGameEntity(user);
+        String gameThumbnailUrl = createGameRequest.getGameThumbnailUrl();
+        if (gameThumbnailUrl == null || gameThumbnailUrl.isBlank()) {
+            gameThumbnailUrl = defaultGameThumbnailUrl;
+        }
+
+        GameEntity gameEntity = createGameRequest.toGameEntity(user, gameThumbnailUrl);
 
         try {
             gameRepository.persistOnly(gameEntity);
@@ -169,7 +176,12 @@ public class GameService {
         // 기존 질문들 삭제
         questionRepository.deleteByGame(existingGame);
 
-        GameEntity game = updateGameRequest.fromGameEntity(existingUser, existingGame);
+        String gameThumbnailUrl = updateGameRequest.getGameThumbnailUrl();
+        if (gameThumbnailUrl == null || gameThumbnailUrl.isBlank()) {
+            gameThumbnailUrl = defaultGameThumbnailUrl;
+        }
+
+        GameEntity game = updateGameRequest.fromGameEntity(existingUser, gameThumbnailUrl, existingGame);
 
         gameRepository.save(game);
 
