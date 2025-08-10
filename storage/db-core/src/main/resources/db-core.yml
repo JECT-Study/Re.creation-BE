@@ -27,7 +27,7 @@ storage:
       driver-class-name: org.h2.Driver
       jdbc-url: jdbc:h2:mem:core;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
       username: sa
-      pool-name: core-db-pool
+      pool-name: recreation-db-pool
       data-source-properties:
         rewriteBatchedStatements: true
 
@@ -37,7 +37,7 @@ spring.config.activate.on-profile: prod
 spring:
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     properties:
       hibernate:
         format_sql: false
@@ -50,10 +50,14 @@ storage:
       jdbc-url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
       username: ${DB_USERNAME}
       password: ${DB_PASSWORD}
+      maximum-pool-size: 10
+      connection-timeout: 1100
+      keepalive-time: 30000
+      validation-timeout: 1000
+      max-lifetime: 600000
       pool-name: core-db-pool
       data-source-properties:
         rewriteBatchedStatements: true
         cachePrepStmts: true
         prepStmtCacheSize: 250
         prepStmtCacheSqlLimit: 2048
-

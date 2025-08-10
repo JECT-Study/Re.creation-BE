@@ -54,7 +54,7 @@ public class HttpRequestLoggingAspect {
         requestLogContext.put("query", extractQueryParams(request));
         requestLogContext.put("body", extractRequestBody(joinPoint));
 
-        log.debug("{}", objectMapper.writeValueAsString(requestLogContext));
+        log.info("{}", objectMapper.writeValueAsString(requestLogContext));
 
         return joinPoint.proceed();
     }

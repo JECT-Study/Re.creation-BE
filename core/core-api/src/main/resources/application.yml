@@ -5,8 +5,17 @@ spring:
     import:
       - db-core.yml
       - logging.yml
-      - optional:classpath:secret.yml
   web.resources.add-mappings: false
 
 prefix:
   image-prefix: https://creationre.s3.ap-northeast-2.amazonaws.com/
+
+
+---
+spring.config.activate.on-profile: local
+
+spring:
+  config:
+    import:
+      - optional:classpath:secret.yml
+
