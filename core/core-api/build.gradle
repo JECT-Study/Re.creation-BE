@@ -13,6 +13,3 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
-processResources {
-    exclude 'secret.yml'
-}
