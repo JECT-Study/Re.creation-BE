@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
@@ -1176,13 +1177,14 @@ class GameApiIntegrationTest {
         @Test
         void 게임_수정을_동시에_시도하면_하나만_성공한다() throws InterruptedException {
             int THREAD_COUNT = 10;
-            List<HttpStatusCode> statuses = new ArrayList<>();
+            List<HttpStatusCode> statuses = new CopyOnWriteArrayList<>();
             CountDownLatch startLatch = new CountDownLatch(1);
             CountDownLatch doneLatch = new CountDownLatch(THREAD_COUNT);
 
             for (int i = 0; i < THREAD_COUNT; i++) {
-                Thread thread = new Thread(() -> {
+                new Thread(() -> {
                     try {
+                        startLatch.await();
                         ResponseEntity<?> response = restTemplate.exchange(
                                 "/games/" + gameId,
                                 HttpMethod.PUT,
@@ -1190,13 +1192,13 @@ class GameApiIntegrationTest {
                                 new ParameterizedTypeReference<>() {}
                         );
                         statuses.add(response.getStatusCode());
+                    } catch (Exception e) {
+                        statuses.add(HttpStatusCode.valueOf(500));
                     } finally {
                         doneLatch.countDown();
                     }
 
-                });
-
-                thread.start();
+                }).start();
             }
 
             startLatch.countDown();
