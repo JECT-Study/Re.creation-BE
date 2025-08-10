@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
@@ -57,6 +58,9 @@ class GameApiIntegrationTest {
     private List<GameEntity> games;
 
     private List<QuestionEntity> questions;
+
+    @Value("${default-image.game-thumbnail-url}")
+    private String defaultGameThumbnailUrl;
 
     @BeforeEach
     void initializeData() {
@@ -971,6 +975,32 @@ class GameApiIntegrationTest {
         }
 
         @Test
+        void 썸네일_이미지를_지정하지_않으면_디폴트_이미지가_설정된다() {
+            CreateGameRequest requestWithoutThumbnail = CreateGameRequest.builder()
+                    .gameId(UUID.randomUUID())
+                    .gameTitle("GAME WITHOUT THUMBNAIL")
+                    .questions(List.of(
+                            new CreateGameRequest.QuestionRequest("http://image.url/question1", 0, "질문 1", "답변 1"),
+                            new CreateGameRequest.QuestionRequest("http://image.url/question2", 1, "질문 2", "답변 2")
+                    ))
+                    .build();
+
+            ResponseEntity<ApiResponse<String>> response = restTemplate.exchange(
+                    "/games",
+                    HttpMethod.POST,
+                    new HttpEntity<>(requestWithoutThumbnail, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameEntity createdGame = gameRepository.findById(requestWithoutThumbnail.getGameId())
+                    .orElseThrow(() -> new RuntimeException("게임을 찾을 수 없습니다."));
+
+            assertThat(createdGame.getGameThumbnailUrl()).isEqualTo(defaultGameThumbnailUrl);
+        }
+
+        @Test
         void 이미_존재하는_gameId로_게임을_생성하려고_하면_409를_반환한다() {
             createGameRequest.setGameId(games.getFirst().getGameId());
 
@@ -1062,6 +1092,32 @@ class GameApiIntegrationTest {
                 assertThat(updatedQuestion.getQuestionText()).isEqualTo(questionRequest.getQuestionText());
                 assertThat(updatedQuestion.getQuestionAnswer()).isEqualTo(questionRequest.getQuestionAnswer());
             });
+        }
+
+        @Test
+        void 썸네일_이미지를_지정하지_않으면_디폴트_이미지가_설정된다() {
+            UpdateGameRequest requestWithoutThumbnail = UpdateGameRequest.builder()
+                    .gameTitle("UPDATE GAME WITHOUT THUMBNAIL")
+                    .version(1)
+                    .questions(List.of(
+                            new UpdateGameRequest.UpdateQuestionRequest("http://image.url/question1", 0, "수정된 질문 1", "수정된 답변 1"),
+                            new UpdateGameRequest.UpdateQuestionRequest("http://image.url/question2", 1, "수정된 질문 2", "수정된 답변 2")
+                    ))
+                    .build();
+
+            ResponseEntity<ApiResponse<String>> response = restTemplate.exchange(
+                    "/games/" + gameId,
+                    HttpMethod.PUT,
+                    new HttpEntity<>(requestWithoutThumbnail, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameEntity updatedGame = gameRepository.findById(gameId)
+                    .orElseThrow(() -> new RuntimeException("게임을 찾을 수 없습니다."));
+
+            assertThat(updatedGame.getGameThumbnailUrl()).isEqualTo(defaultGameThumbnailUrl);
         }
 
         @Test
