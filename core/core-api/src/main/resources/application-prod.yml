@@ -19,4 +19,15 @@ aws:
     bucket: ${AWS_S3_BUCKET}
     region: ${AWS_REGION}
     access-key: ${AWS_ACCESS_KEY}
-    secret-key: ${AWS_SECRET_KEY} 
+    secret-key: ${AWS_SECRET_KEY}
+
+cors:
+  allowed-origins: "https://super-zuccutto-b23df7.netlify.app,https://creation-re.site"
+  allowed-methods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+
+server:
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: true

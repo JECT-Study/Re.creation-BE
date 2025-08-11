@@ -15,6 +15,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.time.Duration;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -22,15 +28,39 @@ public class SecurityConfig {
 
     @Value("${spring.profiles.active}")
     private String activeProfile;
+
+    @Value("${cors.allowed-origins}")
+    private List<String> allowedOrigins;
+
+    @Value("${cors.allowed-methods}")
+    private List<String> allowedMethods;
     
     @Bean
     public SessionAuthenticationFilter sessionAuthenticationFilter(UserDetailsService userDetailsService) {
         return new SessionAuthenticationFilter(userDetailsService);
     }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration corsConfig = new CorsConfiguration();
+
+        corsConfig.setAllowedOrigins(allowedOrigins);
+        corsConfig.setAllowedMethods(allowedMethods);
+        corsConfig.setAllowedHeaders(List.of("*"));
+        corsConfig.setExposedHeaders(List.of("ETag","x-amz-request-id","x-amz-version-id"));
+        corsConfig.setAllowCredentials(true);
+        corsConfig.setMaxAge(Duration.ofHours(1));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", corsConfig);
+
+        return source;
+    }
     
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, SessionAuthenticationFilter sessionAuthenticationFilter) throws Exception {
         http
+                .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
@@ -46,12 +76,12 @@ public class SecurityConfig {
                                         "/games", "/games/{gameId}").permitAll()
                                 .requestMatchers(HttpMethod.POST,
                                         "/games/{gameId}/plays").permitAll();
-                                // .anyRequest().authenticated();
 
                         if ("local".equals(activeProfile)) {
                             auth.requestMatchers("/test/login/kakao").permitAll();
                         }
 
+                        auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
                         auth.anyRequest().authenticated();
                     }
                 )
