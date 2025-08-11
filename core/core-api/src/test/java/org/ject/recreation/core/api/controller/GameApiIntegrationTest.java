@@ -620,6 +620,9 @@ class GameApiIntegrationTest {
                     .orElseThrow(() -> new RuntimeException("비공유 게임이 없습니다."))
                     .getGameId();
 
+            long oldVersion = gameRepository.findById(unsharedGameId)
+                    .orElseThrow().getVersion();
+
             ResponseEntity<ApiResponse<Void>> response = restTemplate.exchange(
                     "/games/" + unsharedGameId + "/share",
                     HttpMethod.POST,
@@ -630,8 +633,11 @@ class GameApiIntegrationTest {
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
             GameEntity sharedGame = gameRepository.findById(unsharedGameId).orElse(null);
+            long newVersion = sharedGame.getVersion();
+
             assertThat(sharedGame).isNotNull();
             assertThat(sharedGame.isShared()).isTrue();
+            assertThat(newVersion).isEqualTo(oldVersion);
         }
 
         @Test
@@ -641,6 +647,9 @@ class GameApiIntegrationTest {
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("공유된 게임이 없습니다."))
                     .getGameId();
+
+            long oldVersion = gameRepository.findById(sharedGameId)
+                    .orElseThrow().getVersion();
 
             ResponseEntity<ApiResponse<Void>> response = restTemplate.exchange(
                     "/games/" + sharedGameId + "/unshare",
@@ -652,8 +661,11 @@ class GameApiIntegrationTest {
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
             GameEntity unsharedGame = gameRepository.findById(sharedGameId).orElse(null);
+            long newVersion = unsharedGame.getVersion();
+
             assertThat(unsharedGame).isNotNull();
             assertThat(unsharedGame.isShared()).isFalse();
+            assertThat(newVersion).isEqualTo(oldVersion);
         }
 
         @Test
