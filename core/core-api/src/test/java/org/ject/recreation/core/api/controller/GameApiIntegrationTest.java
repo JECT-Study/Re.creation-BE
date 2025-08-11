@@ -614,10 +614,14 @@ class GameApiIntegrationTest {
 
         @Test
         void 게임_공유_시_공유상태로_변경된다() {
-            UUID gameId = games.getFirst().getGameId();
+            UUID unsharedGameId = games.stream()
+                    .filter(game -> !game.isShared())
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("비공유 게임이 없습니다."))
+                    .getGameId();
 
             ResponseEntity<ApiResponse<Void>> response = restTemplate.exchange(
-                    "/games/" + gameId + "/share",
+                    "/games/" + unsharedGameId + "/share",
                     HttpMethod.POST,
                     new HttpEntity<>(null, headers),
                     new ParameterizedTypeReference<>() {}
@@ -625,17 +629,21 @@ class GameApiIntegrationTest {
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            GameEntity sharedGame = gameRepository.findById(gameId).orElse(null);
+            GameEntity sharedGame = gameRepository.findById(unsharedGameId).orElse(null);
             assertThat(sharedGame).isNotNull();
             assertThat(sharedGame.isShared()).isTrue();
         }
 
         @Test
         void 게임_비공유_시_비공유상태로_변경된다() {
-            UUID gameId = games.getFirst().getGameId(); // 비공유 게임
+            UUID sharedGameId = games.stream()
+                    .filter(GameEntity::isShared)
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("공유된 게임이 없습니다."))
+                    .getGameId();
 
             ResponseEntity<ApiResponse<Void>> response = restTemplate.exchange(
-                    "/games/" + gameId + "/unshare",
+                    "/games/" + sharedGameId + "/unshare",
                     HttpMethod.POST,
                     new HttpEntity<>(null, headers),
                     new ParameterizedTypeReference<>() {}
@@ -643,7 +651,7 @@ class GameApiIntegrationTest {
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            GameEntity unsharedGame = gameRepository.findById(gameId).orElse(null);
+            GameEntity unsharedGame = gameRepository.findById(sharedGameId).orElse(null);
             assertThat(unsharedGame).isNotNull();
             assertThat(unsharedGame.isShared()).isFalse();
         }
