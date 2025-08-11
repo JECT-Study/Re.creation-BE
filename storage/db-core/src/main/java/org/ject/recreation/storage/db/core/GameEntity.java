@@ -52,6 +52,7 @@ public class GameEntity extends BaseEntity {
     private int questionCount = 0;
 
     @Column(nullable = false)
+    @OptimisticLock(excluded = true)
     @Builder.Default
     private long playCount = 0;
 
