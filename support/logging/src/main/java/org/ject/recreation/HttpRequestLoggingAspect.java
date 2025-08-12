@@ -22,7 +22,7 @@ import java.util.*;
 @Slf4j
 @Aspect
 @Component
-@Profile({"local", "dev"})
+@Profile({"local", "prod"})
 public class HttpRequestLoggingAspect {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
