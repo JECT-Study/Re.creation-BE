@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
@@ -23,9 +24,9 @@ import org.springframework.http.*;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.IntStream;
@@ -57,6 +58,9 @@ class GameApiIntegrationTest {
     private List<GameEntity> games;
 
     private List<QuestionEntity> questions;
+
+    @Value("${default-image.game-thumbnail-url}")
+    private String defaultGameThumbnailUrl;
 
     @BeforeEach
     void initializeData() {
@@ -343,6 +347,8 @@ class GameApiIntegrationTest {
             UUID gameId = games.getFirst().getGameId();
             long initialPlayCount = gameRepository.findById(gameId)
                     .orElseThrow().getPlayCount();
+            long initialVersion = gameRepository.findById(gameId)
+                    .orElseThrow().getVersion();
 
             // when
             ResponseEntity<ApiResponse<String>> response = restTemplate.exchange(
@@ -357,8 +363,11 @@ class GameApiIntegrationTest {
 
             long updatedPlayCount = gameRepository.findById(gameId)
                     .orElseThrow().getPlayCount();
+            long updatedVersion = gameRepository.findById(gameId)
+                    .orElseThrow().getVersion();
 
             assertThat(updatedPlayCount).isEqualTo(initialPlayCount + 1);
+            assertThat(updatedVersion).isEqualTo(initialVersion);
         }
 
         @Test
@@ -609,10 +618,17 @@ class GameApiIntegrationTest {
 
         @Test
         void 게임_공유_시_공유상태로_변경된다() {
-            UUID gameId = games.getFirst().getGameId();
+            UUID unsharedGameId = games.stream()
+                    .filter(game -> !game.isShared())
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("비공유 게임이 없습니다."))
+                    .getGameId();
+
+            long initialVersion = gameRepository.findById(unsharedGameId)
+                    .orElseThrow().getVersion();
 
             ResponseEntity<ApiResponse<Void>> response = restTemplate.exchange(
-                    "/games/" + gameId + "/share",
+                    "/games/" + unsharedGameId + "/share",
                     HttpMethod.POST,
                     new HttpEntity<>(null, headers),
                     new ParameterizedTypeReference<>() {}
@@ -620,17 +636,27 @@ class GameApiIntegrationTest {
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            GameEntity sharedGame = gameRepository.findById(gameId).orElse(null);
+            GameEntity sharedGame = gameRepository.findById(unsharedGameId).orElse(null);
+            long updatedVersion = sharedGame.getVersion();
+
             assertThat(sharedGame).isNotNull();
             assertThat(sharedGame.isShared()).isTrue();
+            assertThat(updatedVersion).isEqualTo(initialVersion);
         }
 
         @Test
         void 게임_비공유_시_비공유상태로_변경된다() {
-            UUID gameId = games.getFirst().getGameId(); // 비공유 게임
+            UUID sharedGameId = games.stream()
+                    .filter(GameEntity::isShared)
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("공유된 게임이 없습니다."))
+                    .getGameId();
+
+            long initialVersion = gameRepository.findById(sharedGameId)
+                    .orElseThrow().getVersion();
 
             ResponseEntity<ApiResponse<Void>> response = restTemplate.exchange(
-                    "/games/" + gameId + "/unshare",
+                    "/games/" + sharedGameId + "/unshare",
                     HttpMethod.POST,
                     new HttpEntity<>(null, headers),
                     new ParameterizedTypeReference<>() {}
@@ -638,9 +664,12 @@ class GameApiIntegrationTest {
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            GameEntity unsharedGame = gameRepository.findById(gameId).orElse(null);
+            GameEntity unsharedGame = gameRepository.findById(sharedGameId).orElse(null);
+            long updatedVersion = unsharedGame.getVersion();
+
             assertThat(unsharedGame).isNotNull();
             assertThat(unsharedGame.isShared()).isFalse();
+            assertThat(updatedVersion).isEqualTo(initialVersion);
         }
 
         @Test
@@ -971,6 +1000,32 @@ class GameApiIntegrationTest {
         }
 
         @Test
+        void 썸네일_이미지를_지정하지_않으면_디폴트_이미지가_설정된다() {
+            CreateGameRequest requestWithoutThumbnail = CreateGameRequest.builder()
+                    .gameId(UUID.randomUUID())
+                    .gameTitle("GAME WITHOUT THUMBNAIL")
+                    .questions(List.of(
+                            new CreateGameRequest.QuestionRequest("http://image.url/question1", 0, "질문 1", "답변 1"),
+                            new CreateGameRequest.QuestionRequest("http://image.url/question2", 1, "질문 2", "답변 2")
+                    ))
+                    .build();
+
+            ResponseEntity<ApiResponse<String>> response = restTemplate.exchange(
+                    "/games",
+                    HttpMethod.POST,
+                    new HttpEntity<>(requestWithoutThumbnail, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameEntity createdGame = gameRepository.findById(requestWithoutThumbnail.getGameId())
+                    .orElseThrow(() -> new RuntimeException("게임을 찾을 수 없습니다."));
+
+            assertThat(createdGame.getGameThumbnailUrl()).isEqualTo(defaultGameThumbnailUrl);
+        }
+
+        @Test
         void 이미_존재하는_gameId로_게임을_생성하려고_하면_409를_반환한다() {
             createGameRequest.setGameId(games.getFirst().getGameId());
 
@@ -1065,6 +1120,32 @@ class GameApiIntegrationTest {
         }
 
         @Test
+        void 썸네일_이미지를_지정하지_않으면_디폴트_이미지가_설정된다() {
+            UpdateGameRequest requestWithoutThumbnail = UpdateGameRequest.builder()
+                    .gameTitle("UPDATE GAME WITHOUT THUMBNAIL")
+                    .version(1)
+                    .questions(List.of(
+                            new UpdateGameRequest.UpdateQuestionRequest("http://image.url/question1", 0, "수정된 질문 1", "수정된 답변 1"),
+                            new UpdateGameRequest.UpdateQuestionRequest("http://image.url/question2", 1, "수정된 질문 2", "수정된 답변 2")
+                    ))
+                    .build();
+
+            ResponseEntity<ApiResponse<String>> response = restTemplate.exchange(
+                    "/games/" + gameId,
+                    HttpMethod.PUT,
+                    new HttpEntity<>(requestWithoutThumbnail, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameEntity updatedGame = gameRepository.findById(gameId)
+                    .orElseThrow(() -> new RuntimeException("게임을 찾을 수 없습니다."));
+
+            assertThat(updatedGame.getGameThumbnailUrl()).isEqualTo(defaultGameThumbnailUrl);
+        }
+
+        @Test
         void 내가_만들지_않은_게임을_수정하려고_하면_403을_반환한다() {
             UUID otherUserGameId = games.stream()
                     .filter(game -> !game.getGameCreator().getEmail().equals(me.getEmail()))
@@ -1120,13 +1201,14 @@ class GameApiIntegrationTest {
         @Test
         void 게임_수정을_동시에_시도하면_하나만_성공한다() throws InterruptedException {
             int THREAD_COUNT = 10;
-            List<HttpStatusCode> statuses = new ArrayList<>();
+            List<HttpStatusCode> statuses = new CopyOnWriteArrayList<>();
             CountDownLatch startLatch = new CountDownLatch(1);
             CountDownLatch doneLatch = new CountDownLatch(THREAD_COUNT);
 
             for (int i = 0; i < THREAD_COUNT; i++) {
-                Thread thread = new Thread(() -> {
+                new Thread(() -> {
                     try {
+                        startLatch.await();
                         ResponseEntity<?> response = restTemplate.exchange(
                                 "/games/" + gameId,
                                 HttpMethod.PUT,
@@ -1134,13 +1216,13 @@ class GameApiIntegrationTest {
                                 new ParameterizedTypeReference<>() {}
                         );
                         statuses.add(response.getStatusCode());
+                    } catch (Exception e) {
+                        statuses.add(HttpStatusCode.valueOf(500));
                     } finally {
                         doneLatch.countDown();
                     }
 
-                });
-
-                thread.start();
+                }).start();
             }
 
             startLatch.countDown();

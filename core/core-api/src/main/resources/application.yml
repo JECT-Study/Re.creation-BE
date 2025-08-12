@@ -10,6 +10,9 @@ spring:
 prefix:
   image-prefix: https://creationre.s3.ap-northeast-2.amazonaws.com/
 
+default-image:
+  game-thumbnail-url: default/default_game_thumbnail.png
+
 
 ---
 spring.config.activate.on-profile: local
@@ -19,3 +22,13 @@ spring:
     import:
       - optional:classpath:secret.yml
 
+server:
+  servlet:
+    session:
+      cookie:
+        same-site: lax
+        secure: false
+
+cors:
+  allowed-origins: "http://localhost:3000" # 테스트용으로 뒀음
+  allowed-methods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"

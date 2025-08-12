@@ -35,7 +35,6 @@ public class CreateGameRequest implements HasOrderedItems {
     @NotBlank
     private String gameTitle;
 
-    @NotBlank
     private String gameThumbnailUrl;
 
     @NotNull
@@ -72,13 +71,13 @@ public class CreateGameRequest implements HasOrderedItems {
         }
     }
 
-    public GameEntity toGameEntity(UserEntity user) {
+    public GameEntity toGameEntity(UserEntity user, String resolvedGameThumbnailUrl) {
 
         GameEntity game = GameEntity.builder()
                 .gameId(gameId)
                 .gameCreator(user)
                 .gameTitle(gameTitle)
-                .gameThumbnailUrl(gameThumbnailUrl)
+                .gameThumbnailUrl(resolvedGameThumbnailUrl)
                 .questionCount(questions.size())
                 .build();
 

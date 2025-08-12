@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OptimisticLock;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -38,6 +39,7 @@ public class GameEntity extends BaseEntity {
     private String gameThumbnailUrl;
 
     @Column(nullable = false)
+    @OptimisticLock(excluded = true)
     @Builder.Default
     private boolean isShared = false;
 
@@ -50,6 +52,7 @@ public class GameEntity extends BaseEntity {
     private int questionCount = 0;
 
     @Column(nullable = false)
+    @OptimisticLock(excluded = true)
     @Builder.Default
     private long playCount = 0;
 
