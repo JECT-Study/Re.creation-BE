@@ -44,7 +44,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
-        corsConfig.setAllowedOrigins(allowedOrigins);
+        corsConfig.setAllowedOriginPatterns(allowedOrigins);
         corsConfig.setAllowedMethods(allowedMethods);
         corsConfig.setAllowedHeaders(List.of("*"));
         corsConfig.setExposedHeaders(List.of("ETag","x-amz-request-id","x-amz-version-id"));
