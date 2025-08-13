@@ -145,4 +145,10 @@ public class GameController {
     public ApiResponse<GameListResponseDto> getDefaultGameList() {
         return ApiResponse.success(gameService.getDefaultGame());
     }
+
+    @GetMapping("/alert")
+    public ApiResponse<GameListResponseDto> alert() {
+        throw new RuntimeException("에러 테스트 - prod");
+       //  return ApiResponse.success(gameService.getDefaultGame());
+    }
 }
