@@ -10,7 +10,6 @@ public class HealthController {
     // health check용
     @GetMapping("/health")
     public ResponseEntity<Object> health() {
-        throw new RuntimeException("에러 테스트 - prod");
-        // return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
