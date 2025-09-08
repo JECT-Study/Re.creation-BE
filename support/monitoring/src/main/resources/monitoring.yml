@@ -1,0 +1,8 @@
+management:
+  server:
+    address: 0.0.0.0
+    port: 9000
+  endpoints:
+    web:
+      exposure:
+        include: health, prometheus
