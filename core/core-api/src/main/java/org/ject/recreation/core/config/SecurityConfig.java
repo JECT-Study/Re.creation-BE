@@ -81,6 +81,7 @@ public class SecurityConfig {
                             auth.requestMatchers("/test/login/kakao").permitAll();
                         }
 
+                        auth.requestMatchers("/actuator/**").permitAll();
                         auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll();
                         auth.anyRequest().authenticated();
                     }
