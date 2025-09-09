@@ -26,6 +26,12 @@ public class HttpRequestLoggingFilter extends OncePerRequestFilter {
     private static final int MAX_PAYLOAD_LENGTH = 20_000;
 
     @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        return uri.startsWith("/actuator");
+    }
+
+    @Override
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
