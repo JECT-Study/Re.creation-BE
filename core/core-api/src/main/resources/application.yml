@@ -5,6 +5,7 @@ spring:
     import:
       - db-core.yml
       - logging.yml
+      - monitoring.yml
   web.resources.add-mappings: false
 
 prefix:
