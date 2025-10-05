@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.ject.recreation.core.api.controller.request.SocialLoginRequestDto;
 import org.ject.recreation.core.api.controller.response.SocialLoginResponseDto;
+import org.ject.recreation.core.domain.DefaultProfileImage;
 import org.ject.recreation.core.domain.SocialLoginService;
 import org.ject.recreation.core.support.error.ErrorType;
 import org.ject.recreation.core.support.response.ApiResponse;
@@ -13,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import org.ject.recreation.core.api.controller.session.SessionUserInfo;
 import org.ject.recreation.core.api.controller.session.SessionUserInfoDto;
 import org.ject.recreation.storage.db.core.UserRepository;
 
@@ -29,15 +29,19 @@ public class SocialLoginController {
     @Value("${kakao.redirect-uri}")
     private String kakaoRedirectUri;
 
+    @Value("${prefix.image-prefix}")
+    private String imagePrefix;
+
     @PostMapping("/login/kakao")
     public ApiResponse<SocialLoginResponseDto> login(@Valid @RequestBody SocialLoginRequestDto request, HttpSession session) {
+        String randomImagePath = DefaultProfileImage.getRandomImagePath();
         try {
-            SocialLoginResponseDto response = socialLoginService.loginWithKakao(request);
+            SocialLoginResponseDto response = socialLoginService.loginWithKakao(request,randomImagePath);
             if (response.getEmail() != null) {
                 SessionUserInfoDto userInfo = SessionUserInfoDto.builder()
                     .email(response.getEmail())
                     .nickname(response.getNickname())
-                    .profileImageUrl(response.getProfileImageUrl())
+                    .profileImageUrl(imagePrefix+response.getProfileImageUrl())
                     .build();
                 session.setAttribute("userInfo", userInfo);
             }
@@ -51,8 +55,8 @@ public class SocialLoginController {
     public void redirectToKakaoLogin(HttpServletResponse response) throws IOException {
         String url = "https://kauth.kakao.com/oauth/authorize"
                 + "?client_id=" + kakaoClientId
-                + "&redirect_uri=" + kakaoRedirectUri
-                + "&response_type=code";
+                + "&redirect_uri=" + "https://re-creation.vercel.app/login/kakao"
+        + "&response_type=code";
         response.sendRedirect(url);
     }
 } 
