@@ -55,7 +55,7 @@ public class SocialLoginController {
     public void redirectToKakaoLogin(HttpServletResponse response) throws IOException {
         String url = "https://kauth.kakao.com/oauth/authorize"
                 + "?client_id=" + kakaoClientId
-                + "&redirect_uri=" + "https://re-creation.vercel.app/login/kakao"
+                + "&redirect_uri=" + kakaoRedirectUri
         + "&response_type=code";
         response.sendRedirect(url);
     }
