@@ -34,9 +34,6 @@ public class S3ObjectCopyManager {
 
         AtomicInteger copiedCount = new AtomicInteger(0);
 
-        System.out.println("원본 객체 수");
-        System.out.println(originalObjectsResponse.contents().size());
-
         originalObjectsResponse.contents().stream()
                 .filter(s3Object -> !s3Object.key().equals(sourcePrefix)) // 폴더 객체 제외
                 .forEach(s3Object -> {

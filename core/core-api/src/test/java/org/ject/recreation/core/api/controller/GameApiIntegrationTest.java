@@ -1319,9 +1319,6 @@ class GameApiIntegrationTest {
             GameEntity clonedGame = gameRepository.findById(cloneGameId)
                     .orElseThrow(() -> new RuntimeException("복제된 게임을 찾을 수 없습니다."));
 
-            System.out.println("복제된 게임 ID: " + cloneGameId);
-            System.out.println("복제된 게임 썸네일: " + clonedGame.getGameThumbnailUrl());
-
             List<QuestionEntity> originalQuestions = questionRepository.findByGameOrderByQuestionOrder(originalGame);
             List<QuestionEntity> clonedQuestions = questionRepository.findByGameOrderByQuestionOrder(clonedGame);
 
