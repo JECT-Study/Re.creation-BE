@@ -1,6 +1,7 @@
 package org.ject.recreation.core.domain.game;
 
 import lombok.RequiredArgsConstructor;
+import org.ject.recreation.S3ObjectCopyManager;
 import org.ject.recreation.S3PresignedUrl;
 import org.ject.recreation.S3PresignedUrlManager;
 import org.ject.recreation.core.domain.game.upload.PresignedUrlListResult;
@@ -38,6 +39,7 @@ public class GameService {
     private final GameReader gameReader;
     private final GameWriter gameWriter;
     private final QuestionReader questionReader;
+    private final S3ObjectCopyManager s3ObjectCopyManager;
     private final S3PresignedUrlManager s3PresignedUrlManager;
     private final UserRepository userRepository;
     private final GameRepository gameRepository;
@@ -256,6 +258,21 @@ public class GameService {
         }
 
         gameWriter.unShareGame(game);
+    }
+
+    @Transactional
+    public UUID cloneGame(String curUserEmail, UUID gameId) {
+        UserEntity user = userRepository.findById(curUserEmail)
+                .orElseThrow(() -> new CoreException(UNAUTHORIZED));
+        UUID cloneGameId = UUID.randomUUID();
+
+        s3ObjectCopyManager.copyObjectsByPrefix(
+                "games/" + gameId.toString(),
+                "games/" + cloneGameId.toString()
+        );
+        gameWriter.cloneGame(gameId, cloneGameId, user);
+
+        return cloneGameId;
     }
   
 }

@@ -141,6 +141,13 @@ public class GameController {
         return ApiResponse.success(null);
     }
 
+    @PostMapping("/{gameId}/clone")
+    public ApiResponse<String> cloneGame(@SessionUserInfo SessionUserInfoDto userInfo,
+                                        @PathVariable UUID gameId) {
+        UUID cloneGameId = gameService.cloneGame(userInfo.getEmail(), gameId);
+        return ApiResponse.success(cloneGameId.toString());
+    }
+
     @GetMapping("/default")
     public ApiResponse<GameListResponseDto> getDefaultGameList() {
         return ApiResponse.success(gameService.getDefaultGame());
