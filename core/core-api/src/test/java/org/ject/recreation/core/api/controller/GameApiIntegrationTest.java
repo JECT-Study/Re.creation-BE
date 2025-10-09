@@ -3,10 +3,7 @@ package org.ject.recreation.core.api.controller;
 import org.ject.recreation.core.api.controller.request.CreateGameRequest;
 import org.ject.recreation.core.api.controller.request.PresignedUrlListRequestDto;
 import org.ject.recreation.core.api.controller.request.UpdateGameRequest;
-import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
-import org.ject.recreation.core.api.controller.response.GameListResponseDto;
-import org.ject.recreation.core.api.controller.response.MyGameListResponseDto;
-import org.ject.recreation.core.api.controller.response.PresignedUrlListResponseDto;
+import org.ject.recreation.core.api.controller.response.*;
 import org.ject.recreation.core.support.response.ApiResponse;
 import org.ject.recreation.storage.db.core.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -1256,12 +1253,113 @@ class GameApiIntegrationTest {
 
     }
 
+    @Nested
+    @DisplayName("게임 복제 API 테스트")
+    class GameCloneApiTest {
+        @BeforeEach
+        void setUp() {
+            setHeaders();
+        }
+
+        @Test
+        void 게임_복제_시_게임내용이_복제된다() {
+            GameEntity originalGame = games.stream()
+                    .filter(game -> !game.getGameCreator().getEmail().equals(me.getEmail()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("다른 사용자의 게임이 없습니다."));
+
+            ResponseEntity<ApiResponse<GameCloneResponseDto>> response = restTemplate.exchange(
+                    "/games/" + originalGame.getGameId() + "/clone",
+                    HttpMethod.POST,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameCloneResponseDto gameCloneResponse = (GameCloneResponseDto) response.getBody().getData();
+            UUID cloneGameId = gameCloneResponse.gameId();
+
+            GameEntity clonedGame = gameRepository.findById(cloneGameId)
+                    .orElseThrow(() -> new RuntimeException("복제된 게임을 찾을 수 없습니다."));
+
+            // 게임 내용 복제 테스트
+            assertThat(clonedGame).isNotNull();
+            assertThat(clonedGame.getGameTitle()).isEqualTo(originalGame.getGameTitle() + " 복사본");
+            assertThat(clonedGame.getGameThumbnailUrl()).contains(clonedGame.getGameId().toString());
+            assertThat(clonedGame.getGameThumbnailUrl()).doesNotContain(originalGame.getGameId().toString());
+            assertThat(clonedGame.getGameCreator().getEmail()).isEqualTo(me.getEmail());
+            assertThat(clonedGame.isShared()).isFalse(); // 복제된 게임은 비공유 상태
+            assertThat(clonedGame.isDeleted()).isFalse(); // 기본값은 false
+            assertThat(clonedGame.getPlayCount()).isEqualTo(0); // 복제본은 플레이횟수 0
+            assertThat(clonedGame.getQuestionCount()).isEqualTo(originalGame.getQuestionCount());
+        }
+
+        @Test
+        void 게임_복제_시_문제들이_복제된다() {
+            GameEntity originalGame = games.stream()
+                    .filter(game -> !game.getGameCreator().getEmail().equals(me.getEmail()))
+                    .findFirst()
+                    .orElseThrow(() -> new RuntimeException("다른 사용자의 게임이 없습니다."));
+
+//            GameEntity originalGame = gameRepository.findById(UUID.fromString("25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f"))
+//                    .orElseThrow(() -> new RuntimeException("게임이 없습니다."));
+
+            ResponseEntity<ApiResponse<GameCloneResponseDto>> response = restTemplate.exchange(
+                    "/games/" + originalGame.getGameId() + "/clone",
+                    HttpMethod.POST,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+            GameCloneResponseDto gameCloneResponse = (GameCloneResponseDto) response.getBody().getData();
+            UUID cloneGameId = gameCloneResponse.gameId();
+            GameEntity clonedGame = gameRepository.findById(cloneGameId)
+                    .orElseThrow(() -> new RuntimeException("복제된 게임을 찾을 수 없습니다."));
+
+            List<QuestionEntity> originalQuestions = questionRepository.findByGameOrderByQuestionOrder(originalGame);
+            List<QuestionEntity> clonedQuestions = questionRepository.findByGameOrderByQuestionOrder(clonedGame);
+
+            assertThat(clonedQuestions.size()).isEqualTo(originalQuestions.size());
+
+            IntStream.range(0, originalQuestions.size()).forEach(i -> {
+                QuestionEntity originalQuestion = originalQuestions.get(i);
+                QuestionEntity clonedQuestion = clonedQuestions.get(i);
+
+                assertThat(clonedQuestion.getImageUrl()).contains(clonedGame.getGameId().toString());
+                assertThat(clonedQuestion.getImageUrl()).doesNotContain(originalGame.getGameId().toString());
+
+                assertThat(clonedQuestion.getQuestionText()).isEqualTo(originalQuestion.getQuestionText());
+                assertThat(clonedQuestion.getQuestionAnswer()).isEqualTo(originalQuestion.getQuestionAnswer());
+
+                System.out.println("복제본 문제 " + i + " 이미지 URL: " + clonedQuestion.getImageUrl());
+            });
+        }
+
+        @Test
+        void 없는_게임을_복제하려고_하면_404를_반환한다() {
+            UUID nonExistentGameId = UUID.randomUUID();
+
+            ResponseEntity<?> response = restTemplate.exchange(
+                    "/games/" + nonExistentGameId + "/clone",
+                    HttpMethod.POST,
+                    new HttpEntity<>(null, headers),
+                    new ParameterizedTypeReference<>() {}
+            );
+
+            assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        }
+    }
+
     private GameEntity createGame(String title, UserEntity user, long playCount, boolean isShared, boolean isDeleted) {
         GameEntity game = new GameEntity();
+        UUID gameId = UUID.randomUUID();
 
-        game.setGameId(UUID.randomUUID());
+        game.setGameId(gameId);
         game.setGameTitle(title);
-        game.setGameThumbnailUrl("http://thumbnail.url/" + title);
+        game.setGameThumbnailUrl("games/" + gameId + "/" + title);
         game.setGameCreator(user);
         game.setPlayCount(playCount);
         game.setShared(isShared);
@@ -1274,7 +1372,7 @@ class GameApiIntegrationTest {
         QuestionEntity question = new QuestionEntity();
         question.setGame(game);
         question.setQuestionOrder(questionOrder);
-        question.setImageUrl("http://image.url/question");
+        question.setImageUrl("games/" + game.getGameId() + "/question-" + questionOrder + ".jpg");
         question.setQuestionText(questionText);
         question.setQuestionAnswer(questionAnswer);
         return question;
