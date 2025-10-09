@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
   title: Re:creat!on API
   description: Re:creat!on 서비스 API 문서 (MVP)
-  version: 1.0.2
+  version: 1.0.3
   contact:
     name: Re:creat!on Team
 
@@ -290,6 +290,15 @@ components:
         questionAnswer:
           type: string
           description: 질문 정답
+
+    # 게임 복제 응답 데이터
+    GameCloneResponse:
+      type: object
+      properties:
+        gameId:
+          type: string
+          format: uuid
+          description: 복제된 게임의 식별자
 
     PresignedUrlImage:
       type: object
@@ -715,7 +724,7 @@ paths:
   /games/{gameId}:
     get:
       summary: 게임 상세 정보 조회
-      description: 게임명, 제작자 닉네임, 문제 목록 등 게임 상세 정보를 조회합니다.  
+      description: 게임명, 제작자 닉네임, 문제 목록 등 게임 상세 정보를 조회합니다.
       tags:
         - 게임
       parameters:
@@ -1035,7 +1044,7 @@ paths:
                   code: "E404"
                   message: "해당 게임이 존재하지 않습니다."
                   data:
-                    gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" 
+                    gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
   /users/me/games:
     get:
@@ -1176,7 +1185,7 @@ paths:
                   code: "E404"
                   message: "해당 게임이 존재하지 않습니다."
                   data:
-                    gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" 
+                    gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
   /games/{gameId}/share:
     post:
@@ -1284,7 +1293,7 @@ paths:
                       code: "E404"
                       message: "해당 게임이 존재하지 않습니다."
                       data:
-                        gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" 
+                        gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                 deleteGame:
                   summary: 삭제된 게임
                   value:
@@ -1294,7 +1303,7 @@ paths:
                       code: "E404"
                       message: "삭제된 게임입니다."
                       data:
-                        gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"  
+                        gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
   /games/{gameId}/unshare:
     post:
@@ -1402,7 +1411,7 @@ paths:
                       code: "E404"
                       message: "해당 게임이 존재하지 않습니다."
                       data:
-                        gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" 
+                        gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                 deleteGame:
                   summary: 삭제된 게임
                   value:
@@ -1412,7 +1421,90 @@ paths:
                       code: "E404"
                       message: "삭제된 게임입니다."
                       data:
-                        gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" 
+                        gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+  /games/{gameId}/clone:
+    post:
+      summary: 게임 복제
+      description: 특정 게임을 복제하여 내 게임 목록으로 추가합니다.
+      tags:
+        - 게임
+      security:
+        - sessionAuth: []
+      parameters:
+        - name: gameId
+          in: path
+          description: 게임식별자
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: 게임 복제 성공
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      result:
+                        enum: [SUCCESS]
+                      data:
+                        $ref: '#/components/schemas/GameCloneResponse'
+                      error:
+                        enum: [null]
+              example:
+                result: "SUCCESS"
+                data:
+                  gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                error: null
+        '401':
+          description: 로그인이 필요함
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      result:
+                        enum: [ERROR]
+                      data:
+                        enum: [null]
+                      error:
+                        $ref: '#/components/schemas/ErrorInfo'
+              example:
+                result: "ERROR"
+                data: null
+                error:
+                  code: "E401"
+                  message: "로그인이 필요합니다."
+                  data: null
+        '404':
+          description: 해당 게임이 존재하지 않음
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/ApiResponse'
+                  - type: object
+                    properties:
+                      result:
+                        enum: [ERROR]
+                      data:
+                        enum: [null]
+                      error:
+                        $ref: '#/components/schemas/ErrorInfo'
+              example:
+                result: "ERROR"
+                data: null
+                error:
+                  code: "E404"
+                  message: "해당 게임이 존재하지 않습니다."
+                  data:
+                    gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
   /games/{gameId}/plays:
     post:
@@ -1470,7 +1562,7 @@ paths:
                   code: "E404"
                   message: "해당 게임이 존재하지 않습니다."
                   data:
-                    gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" 
+                    gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 
   /games/uploads/urls:
     post:
@@ -1543,7 +1635,7 @@ paths:
                 error:
                   code: "E401"
                   message: "로그인이 필요합니다."
-                  data: null 
+                  data: null
 
   /games/{gameId}/uploads/urls:
     post:
@@ -1670,4 +1762,4 @@ paths:
                   code: "E404"
                   message: "해당 게임이 존재하지 않습니다."
                   data:
-                    gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" 
+                    gameId: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
