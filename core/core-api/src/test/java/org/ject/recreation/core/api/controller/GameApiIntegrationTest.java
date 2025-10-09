@@ -3,10 +3,7 @@ package org.ject.recreation.core.api.controller;
 import org.ject.recreation.core.api.controller.request.CreateGameRequest;
 import org.ject.recreation.core.api.controller.request.PresignedUrlListRequestDto;
 import org.ject.recreation.core.api.controller.request.UpdateGameRequest;
-import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
-import org.ject.recreation.core.api.controller.response.GameListResponseDto;
-import org.ject.recreation.core.api.controller.response.MyGameListResponseDto;
-import org.ject.recreation.core.api.controller.response.PresignedUrlListResponseDto;
+import org.ject.recreation.core.api.controller.response.*;
 import org.ject.recreation.core.support.response.ApiResponse;
 import org.ject.recreation.storage.db.core.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -1271,7 +1268,7 @@ class GameApiIntegrationTest {
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("다른 사용자의 게임이 없습니다."));
 
-            ResponseEntity<ApiResponse<String>> response = restTemplate.exchange(
+            ResponseEntity<ApiResponse<GameCloneResponseDto>> response = restTemplate.exchange(
                     "/games/" + originalGame.getGameId() + "/clone",
                     HttpMethod.POST,
                     new HttpEntity<>(null, headers),
@@ -1279,7 +1276,9 @@ class GameApiIntegrationTest {
             );
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-            UUID cloneGameId = UUID.fromString(response.getBody().getData().toString());
+
+            GameCloneResponseDto gameCloneResponse = (GameCloneResponseDto) response.getBody().getData();
+            UUID cloneGameId = gameCloneResponse.gameId();
 
             GameEntity clonedGame = gameRepository.findById(cloneGameId)
                     .orElseThrow(() -> new RuntimeException("복제된 게임을 찾을 수 없습니다."));
@@ -1306,7 +1305,7 @@ class GameApiIntegrationTest {
 //            GameEntity originalGame = gameRepository.findById(UUID.fromString("25cfc8db-4eb1-4f21-8e5b-f4b77189ec2f"))
 //                    .orElseThrow(() -> new RuntimeException("게임이 없습니다."));
 
-            ResponseEntity<ApiResponse<String>> response = restTemplate.exchange(
+            ResponseEntity<ApiResponse<GameCloneResponseDto>> response = restTemplate.exchange(
                     "/games/" + originalGame.getGameId() + "/clone",
                     HttpMethod.POST,
                     new HttpEntity<>(null, headers),
@@ -1315,7 +1314,8 @@ class GameApiIntegrationTest {
 
             assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-            UUID cloneGameId = UUID.fromString(response.getBody().getData().toString());
+            GameCloneResponseDto gameCloneResponse = (GameCloneResponseDto) response.getBody().getData();
+            UUID cloneGameId = gameCloneResponse.gameId();
             GameEntity clonedGame = gameRepository.findById(cloneGameId)
                     .orElseThrow(() -> new RuntimeException("복제된 게임을 찾을 수 없습니다."));
 

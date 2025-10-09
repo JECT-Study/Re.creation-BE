@@ -5,6 +5,7 @@ import org.ject.recreation.core.api.controller.request.CreateGameRequest;
 import org.ject.recreation.core.api.controller.request.GameListRequestDto;
 import org.ject.recreation.core.api.controller.request.PresignedUrlListRequestDto;
 import org.ject.recreation.core.api.controller.request.UpdateGameRequest;
+import org.ject.recreation.core.api.controller.response.GameCloneResponseDto;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
 import org.ject.recreation.core.api.controller.response.PresignedUrlListResponseDto;
 import org.ject.recreation.core.api.controller.response.GameDetailResponseDto;
@@ -142,10 +143,10 @@ public class GameController {
     }
 
     @PostMapping("/{gameId}/clone")
-    public ApiResponse<String> cloneGame(@SessionUserInfo SessionUserInfoDto userInfo,
-                                        @PathVariable UUID gameId) {
+    public ApiResponse<GameCloneResponseDto> cloneGame(@SessionUserInfo SessionUserInfoDto userInfo,
+                                                       @PathVariable UUID gameId) {
         UUID cloneGameId = gameService.cloneGame(userInfo.getEmail(), gameId);
-        return ApiResponse.success(cloneGameId.toString());
+        return ApiResponse.success(new GameCloneResponseDto(cloneGameId));
     }
 
     @GetMapping("/default")
