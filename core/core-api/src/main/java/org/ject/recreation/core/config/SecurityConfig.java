@@ -116,6 +116,22 @@ public class SecurityConfig {
                             
                             response.getWriter().write(jsonResponse);
                         })
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .deleteCookies("JSESSIONID")
+                        .invalidateHttpSession(true)
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.setCharacterEncoding("UTF-8");
+
+                            ApiResponse<?> successResponse = ApiResponse.success(null);
+                            ObjectMapper objectMapper = new ObjectMapper();
+                            String jsonResponse = objectMapper.writeValueAsString(successResponse);
+
+                            response.getWriter().write(jsonResponse);
+                        })
                 );
 
         return http.build();
