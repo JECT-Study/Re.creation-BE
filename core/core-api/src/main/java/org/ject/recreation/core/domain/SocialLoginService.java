@@ -28,11 +28,12 @@ public class SocialLoginService {
     @Value("${kakao.client-secret:}")
     private String kakaoClientSecret;
 
-    public SocialLoginResponseDto loginWithKakao(SocialLoginRequestDto request) {
+    public SocialLoginResponseDto loginWithKakao(SocialLoginRequestDto request,
+                                                 String randomImagePath) {
         String accessToken = getKakaoAccessToken(request.getCode());
         Map<String, String> userInfo = getKakaoUserInfo(accessToken);
-        UserEntity userEntity = saveOrUpdateUser(userInfo);
-        return createResponse(userEntity);
+        UserEntity userEntity = saveOrUpdateUser(userInfo, randomImagePath);
+        return createResponse(userEntity, randomImagePath);
     }
 
     private String getKakaoAccessToken(String code) {
@@ -76,21 +77,22 @@ public class SocialLoginService {
         return userInfo;
     }
 
-    private UserEntity saveOrUpdateUser(Map<String, String> userInfo) {
+    private UserEntity saveOrUpdateUser(Map<String, String> userInfo,
+                                        String randomImagePath) {
         String email = userInfo.get("email");
         String nickname = userInfo.get("nickname");
         String profileImageUrl = userInfo.get("profileImageUrl");
 
         UserEntity userEntity = userRepository.findById(email).orElse(
-            new UserEntity(email, "kakao", profileImageUrl, nickname, LocalDateTime.now(), LocalDateTime.now())
+            new UserEntity(email, "kakao", randomImagePath, nickname, LocalDateTime.now(), LocalDateTime.now())
         );
         return userRepository.save(userEntity);
-    }
+}
 
-    private SocialLoginResponseDto createResponse(UserEntity userEntity) {
+    private SocialLoginResponseDto createResponse(UserEntity userEntity, String randomImagePath) {
         return SocialLoginResponseDto.builder()
             .email(userEntity.getEmail())
             .nickname(userEntity.getNickname())
-            .profileImageUrl(userEntity.getProfileImageUrl()).build();
+            .profileImageUrl(randomImagePath).build();
     }
 } 
