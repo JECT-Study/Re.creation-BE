@@ -83,11 +83,23 @@ public class SocialLoginService {
         String nickname = userInfo.get("nickname");
         String profileImageUrl = userInfo.get("profileImageUrl");
 
-        UserEntity userEntity = userRepository.findById(email).orElse(
-            new UserEntity(email, "kakao", randomImagePath, nickname, LocalDateTime.now(), LocalDateTime.now())
-        );
-        return userRepository.save(userEntity);
-}
+//        UserEntity userEntity = userRepository.findById(email).orElse(
+//            new UserEntity(email, "kakao", randomImagePath, nickname, LocalDateTime.now(), LocalDateTime.now())
+//        );
+//        return userRepository.save(userEntity);
+        return userRepository.findById(email)
+                .orElseGet(() -> {
+                    UserEntity newUser = new UserEntity(
+                            email,
+                            "kakao",
+                            randomImagePath,
+                            nickname,
+                            LocalDateTime.now(),
+                            LocalDateTime.now()
+                    );
+                    return userRepository.save(newUser);
+                });
+    }
 
     private SocialLoginResponseDto createResponse(UserEntity userEntity, String randomImagePath) {
         return SocialLoginResponseDto.builder()
