@@ -27,6 +27,8 @@ public class SocialLoginService {
     private String kakaoRedirectUri;
     @Value("${kakao.client-secret:}")
     private String kakaoClientSecret;
+    @Value("${prefix.image-prefix}")
+    private String imagePrefix;
 
     public SocialLoginResponseDto loginWithKakao(SocialLoginRequestDto request,
                                                  String randomImagePath) {
@@ -105,6 +107,6 @@ public class SocialLoginService {
         return SocialLoginResponseDto.builder()
             .email(userEntity.getEmail())
             .nickname(userEntity.getNickname())
-            .profileImageUrl(randomImagePath).build();
+            .profileImageUrl(imagePrefix+randomImagePath).build();
     }
 } 
