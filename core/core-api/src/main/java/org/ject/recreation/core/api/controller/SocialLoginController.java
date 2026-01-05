@@ -41,7 +41,7 @@ public class SocialLoginController {
                 SessionUserInfoDto userInfo = SessionUserInfoDto.builder()
                     .email(response.getEmail())
                     .nickname(response.getNickname())
-                    .profileImageUrl(imagePrefix+response.getProfileImageUrl())
+                    .profileImageUrl(response.getProfileImageUrl())
                     .build();
                 session.setAttribute("userInfo", userInfo);
             }
