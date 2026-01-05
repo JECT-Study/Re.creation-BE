@@ -35,7 +35,7 @@ public class SocialLoginService {
         String accessToken = getKakaoAccessToken(request.getCode());
         Map<String, String> userInfo = getKakaoUserInfo(accessToken);
         UserEntity userEntity = saveOrUpdateUser(userInfo, randomImagePath);
-        return createResponse(userEntity, randomImagePath);
+        return createResponse(userEntity);
     }
 
     private String getKakaoAccessToken(String code) {
@@ -103,10 +103,10 @@ public class SocialLoginService {
                 });
     }
 
-    private SocialLoginResponseDto createResponse(UserEntity userEntity, String randomImagePath) {
+    private SocialLoginResponseDto createResponse(UserEntity userEntity) {
         return SocialLoginResponseDto.builder()
             .email(userEntity.getEmail())
             .nickname(userEntity.getNickname())
-            .profileImageUrl(imagePrefix+randomImagePath).build();
+            .profileImageUrl(imagePrefix+userEntity.getProfileImageUrl()).build();
     }
 } 
