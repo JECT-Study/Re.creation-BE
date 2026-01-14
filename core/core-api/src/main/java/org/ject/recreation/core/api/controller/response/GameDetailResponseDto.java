@@ -16,5 +16,5 @@ public record GameDetailResponseDto(
             String questionText,
             String questionAnswer,
             long version
-    ) { }
+    ) {}
 }

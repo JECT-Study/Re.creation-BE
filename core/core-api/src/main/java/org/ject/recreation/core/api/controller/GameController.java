@@ -1,10 +1,7 @@
 package org.ject.recreation.core.api.controller;
 
 import jakarta.validation.Valid;
-import org.ject.recreation.core.api.controller.request.CreateGameRequest;
-import org.ject.recreation.core.api.controller.request.GameListRequestDto;
-import org.ject.recreation.core.api.controller.request.PresignedUrlListRequestDto;
-import org.ject.recreation.core.api.controller.request.UpdateGameRequest;
+import org.ject.recreation.core.api.controller.request.*;
 import org.ject.recreation.core.api.controller.response.GameCloneResponseDto;
 import org.ject.recreation.core.api.controller.response.GameListResponseDto;
 import org.ject.recreation.core.api.controller.response.PresignedUrlListResponseDto;
@@ -153,4 +150,14 @@ public class GameController {
     public ApiResponse<GameListResponseDto> getDefaultGameList() {
         return ApiResponse.success(gameService.getDefaultGame());
     }
+
+    @PostMapping("{gameId}/report")
+    public ApiResponse<Void> reportGame(@PathVariable UUID gameId,
+                                     @SessionUserInfo(required = false) SessionUserInfoDto userInfo, // null 가능
+                                     @RequestBody ReportGameRequestDto reportGameRequestDto) {
+        String reporterEmail = userInfo != null ? userInfo.getEmail() : null;
+        gameService.reportGame(gameId, reporterEmail, reportGameRequestDto);
+        return ApiResponse.success(null);
+    }
+
 }
