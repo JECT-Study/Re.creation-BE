@@ -2,6 +2,7 @@ package org.ject.recreation.core.api.controller;
 
 import jakarta.servlet.http.HttpSession;
 import org.ject.recreation.core.api.controller.session.SessionUserInfoDto;
+import org.ject.recreation.core.domain.DefaultProfileImage;
 import org.ject.recreation.core.support.response.ApiResponse;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,10 +20,11 @@ import java.util.List;
 public class TestLoginController {
     @PostMapping("/test/login/kakao")
     public ApiResponse<Void> mockLogin(HttpSession session) {
+        String randomProfilePath = DefaultProfileImage.getRandomImagePath();
         SessionUserInfoDto userInfo = SessionUserInfoDto.builder()
                 .email("test@example.com")
                 .nickname("테스트유저")
-                .profileImageUrl("http://image.url/question")
+                .profileImageUrl(randomProfilePath)
                 .build();
 
         session.setAttribute("userInfo", userInfo);
