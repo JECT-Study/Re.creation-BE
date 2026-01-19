@@ -74,6 +74,7 @@ public class SampleDataInitializer implements CommandLineRunner {
                 .platform("kakao")
                 .profileImageUrl("https://example.com/profile1.jpg")
                 .nickname("게임마스터")
+                .role(UserRole.ADMIN)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();

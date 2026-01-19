@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.ject.recreation.core.api.controller.session.SessionUserInfoDto;
-import org.ject.recreation.core.api.controller.session.UserRole;
+import org.ject.recreation.storage.db.core.UserRole;
 
 @Getter
 @NoArgsConstructor

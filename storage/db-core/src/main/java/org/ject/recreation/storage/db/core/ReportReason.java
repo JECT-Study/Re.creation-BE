@@ -14,4 +14,8 @@ public enum ReportReason {
         if (reason == null) return null;
         return ReportReason.valueOf(reason);
     }
+
+    public boolean isBlank() {
+        return false;
+    }
 }

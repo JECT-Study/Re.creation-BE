@@ -3,17 +3,13 @@ package org.ject.recreation.core.api.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.ject.recreation.core.api.controller.request.BlockUserRequestDto;
 import org.ject.recreation.core.api.controller.request.GameDeleteRequestDto;
-import org.ject.recreation.core.api.controller.request.ReportGameRequestDto;
+import org.ject.recreation.core.api.controller.response.GetAllUserResponseDto;
 import org.ject.recreation.core.api.controller.response.ReportGameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.ReportGameResponseDto;
 import org.ject.recreation.core.domain.admin.AdminService;
-import org.ject.recreation.core.domain.game.Game;
 import org.ject.recreation.core.support.response.ApiResponse;
-import org.springframework.data.domain.Page;
+import org.ject.recreation.core.support.response.PageResponseDto;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.UUID;
 
 @Slf4j
 @RestController
@@ -27,7 +23,7 @@ public class AdminController {
     }
 
     @GetMapping("/games")
-    public ApiResponse<Page<ReportGameResponseDto>> getReportGames(
+    public ApiResponse<PageResponseDto<ReportGameResponseDto>> getReportGames(
             @RequestParam(defaultValue = "0") int page) {
         return ApiResponse.success(adminService.getReportedGames(page));
     }
@@ -44,8 +40,20 @@ public class AdminController {
         return ApiResponse.success(adminService.deleteReportedDetailGames(gameDeleteRequestDto));
     }
 
-//    @PostMapping("/users/block")
-//    public void blockUser(@RequestBody BlockUserRequestDto blockUserRequestDto){
-//        return adminService.blockUser(blockUserRequestDto);
-//    }
+    @GetMapping("/users")
+    public ApiResponse<PageResponseDto<GetAllUserResponseDto>> getUsers(
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        return ApiResponse.success(adminService.getAllUsers(page));
+    }
+
+    @PostMapping("/users/block")
+    public ApiResponse<Void> blockUser(@RequestBody BlockUserRequestDto blockUserRequestDto){
+        return ApiResponse.success(adminService.blockUser(blockUserRequestDto));
+    }
+
+    @PostMapping("/users/unblock")
+    public ApiResponse<Void> unBlockUser(@RequestBody BlockUserRequestDto blockUserRequestDto){
+        return ApiResponse.success(adminService.unBlockUser(blockUserRequestDto));
+    }
 }
