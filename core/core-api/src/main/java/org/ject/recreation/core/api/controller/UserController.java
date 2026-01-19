@@ -23,6 +23,7 @@ public class UserController {
 
     private final UserService userService;
 
+
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -54,6 +55,6 @@ public class UserController {
             // 세션 자체가 없음 (만료됨)
             throw new CoreException(ErrorType.UNAUTHORIZED);
         }
-        return ApiResponse.success(AuthResponseDto.createResponseDto(userInfo));
+        return ApiResponse.success(userService.getUserByEmail(userInfo));
     }
 }
