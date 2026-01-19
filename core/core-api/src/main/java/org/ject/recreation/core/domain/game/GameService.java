@@ -1,9 +1,11 @@
 package org.ject.recreation.core.domain.game;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.ject.recreation.S3ObjectCopyManager;
 import org.ject.recreation.S3PresignedUrl;
 import org.ject.recreation.S3PresignedUrlManager;
+import org.ject.recreation.core.api.controller.request.ReportGameRequestDto;
 import org.ject.recreation.core.domain.game.upload.PresignedUrlListResult;
 import org.ject.recreation.core.domain.game.upload.PresignedUrlQuery;
 import org.ject.recreation.core.domain.game.upload.PresignedUrlResult;
@@ -24,8 +26,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.IntStream;
 import java.util.stream.Collectors;
@@ -34,6 +38,7 @@ import static org.ject.recreation.core.support.error.ErrorType.*;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class GameService {
 
     private final GameReader gameReader;
@@ -44,6 +49,7 @@ public class GameService {
     private final UserRepository userRepository;
     private final GameRepository gameRepository;
     private final QuestionRepository questionRepository;
+    private final ReportRepository reportRepository;
 
     @Value("${prefix.image-prefix}")
     private String imagePrefix;
@@ -274,5 +280,24 @@ public class GameService {
 
         return cloneGameId;
     }
-  
+
+    public void reportGame(UUID gameId, String reporterEmail, ReportGameRequestDto reportGameRequestDto){
+        GameEntity byId = gameRepository.findById(gameId)
+                .orElseThrow(() -> new CoreException(ErrorType.GAME_NOT_FOUND));
+        UserEntity reporter = null;
+        if (reporterEmail != null) {
+            reporter = userRepository.findById(reporterEmail).orElse(null);
+        }
+        try{
+//        GameReportReason reasonCode = reportGameRequestDto.getReasonCode();
+            // 5. Enum을 직접 넘기도록 수정 권장
+            ReportEntity entity = ReportEntity.toEntity(byId, reporter, reportGameRequestDto.getReasonCode().name());
+            reportRepository.save(entity);
+        } catch (Exception e) {
+            // 6. 예기치 못한 DB 에러 처리
+            log.error("신고 저장 중 오류 발생: {}", e.getMessage());
+            throw new CoreException(ErrorType.DEFAULT_ERROR);
+        }
+
+    }
 }

@@ -5,6 +5,7 @@ import org.ject.recreation.core.api.controller.request.SocialLoginRequestDto;
 import org.ject.recreation.core.api.controller.response.SocialLoginResponseDto;
 import org.ject.recreation.storage.db.core.UserEntity;
 import org.ject.recreation.storage.db.core.UserRepository;
+import org.ject.recreation.storage.db.core.UserRole;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -50,11 +51,11 @@ public class SocialLoginService {
         }
         String body = bodyBuilder.toString();
         Mono<Map> tokenMono = webClient.post()
-            .uri(tokenUrl)
-            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-            .bodyValue(body)
-            .retrieve()
-            .bodyToMono(Map.class);
+                .uri(tokenUrl)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(Map.class);
         Map tokenResponse = tokenMono.block();
         return (String) tokenResponse.get("access_token");
     }
@@ -62,20 +63,20 @@ public class SocialLoginService {
     private Map<String, String> getKakaoUserInfo(String accessToken) {
         String userInfoUrl = "https://kapi.kakao.com/v2/user/me";
         Mono<Map> userMono = webClient.get()
-            .uri(userInfoUrl)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-            .retrieve()
-            .bodyToMono(Map.class);
+                .uri(userInfoUrl)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .retrieve()
+                .bodyToMono(Map.class);
         Map userResponse = userMono.block();
 
         Map kakaoAccount = (Map) userResponse.get("kakao_account");
         Map profile = (Map) kakaoAccount.get("profile");
-        
+
         Map<String, String> userInfo = new HashMap<>();
         userInfo.put("email", (String) kakaoAccount.get("email"));
         userInfo.put("nickname", (String) profile.get("nickname"));
         userInfo.put("profileImageUrl", (String) profile.get("profile_image_url"));
-        
+
         return userInfo;
     }
 
@@ -84,29 +85,27 @@ public class SocialLoginService {
         String email = userInfo.get("email");
         String nickname = userInfo.get("nickname");
         String profileImageUrl = userInfo.get("profileImageUrl");
-
-//        UserEntity userEntity = userRepository.findById(email).orElse(
-//            new UserEntity(email, "kakao", randomImagePath, nickname, LocalDateTime.now(), LocalDateTime.now())
-//        );
-//        return userRepository.save(userEntity);
         return userRepository.findById(email)
                 .orElseGet(() -> {
-                    UserEntity newUser = new UserEntity(
-                            email,
-                            "kakao",
-                            randomImagePath,
-                            nickname,
-                            LocalDateTime.now(),
-                            LocalDateTime.now()
-                    );
+                    UserEntity newUser = UserEntity.builder()
+                            .email(email)
+                            .platform("kakao")
+                            .profileImageUrl(randomImagePath)
+                            .nickname(nickname)
+                            .role(UserRole.USER)
+                            .createdAt(LocalDateTime.now())
+                            .updatedAt(LocalDateTime.now())
+                            .build();
                     return userRepository.save(newUser);
                 });
     }
 
     private SocialLoginResponseDto createResponse(UserEntity userEntity) {
         return SocialLoginResponseDto.builder()
-            .email(userEntity.getEmail())
-            .nickname(userEntity.getNickname())
-            .profileImageUrl(imagePrefix+userEntity.getProfileImageUrl()).build();
+                .email(userEntity.getEmail())
+                .nickname(userEntity.getNickname())
+                .profileImageUrl(imagePrefix + userEntity.getProfileImageUrl())
+                .role(UserRole.USER)
+                .build();
     }
 } 

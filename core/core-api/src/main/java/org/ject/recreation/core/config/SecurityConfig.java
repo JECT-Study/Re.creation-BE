@@ -73,9 +73,9 @@ public class SecurityConfig {
                                         "/health"
                                 ).permitAll()
                                 .requestMatchers(HttpMethod.GET,
-                                        "/games", "/games/{gameId}").permitAll()
+                                        "/games", "/games/*").permitAll()
                                 .requestMatchers(HttpMethod.POST,
-                                        "/games/{gameId}/plays").permitAll();
+                                        "/games/*/plays,", "games/*/report").permitAll();
 
                         if ("local".equals(activeProfile)) {
                             auth.requestMatchers("/test/login/kakao").permitAll();

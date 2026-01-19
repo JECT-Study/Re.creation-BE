@@ -1,12 +1,16 @@
 package org.ject.recreation.core.api.controller;
 
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.ject.recreation.core.api.controller.request.MyGameListRequestDto;
+import org.ject.recreation.core.api.controller.response.AuthResponseDto;
 import org.ject.recreation.core.api.controller.response.MyGameListResponseDto;
 import org.ject.recreation.core.api.controller.session.SessionUserInfo;
 import org.ject.recreation.core.api.controller.session.SessionUserInfoDto;
 import org.ject.recreation.core.domain.user.MyGameListResult;
 import org.ject.recreation.core.domain.user.UserService;
+import org.ject.recreation.core.support.error.CoreException;
+import org.ject.recreation.core.support.error.ErrorType;
 import org.ject.recreation.core.support.response.ApiResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -41,5 +45,15 @@ public class UserController {
                         ))
                         .toList()
         ));
+    }
+
+    @GetMapping("/auth/me")
+    public ApiResponse<AuthResponseDto> getAuthMe(@SessionUserInfo SessionUserInfoDto userInfo,
+                                                  HttpSession session) {
+        if (session == null) {
+            // 세션 자체가 없음 (만료됨)
+            throw new CoreException(ErrorType.UNAUTHORIZED);
+        }
+        return ApiResponse.success(AuthResponseDto.createResponseDto(userInfo));
     }
 }

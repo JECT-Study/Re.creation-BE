@@ -2,7 +2,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     properties:
       hibernate.default_batch_fetch_size: 100
 
@@ -12,7 +12,7 @@ spring.config.activate.on-profile: local
 spring:
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -37,7 +37,7 @@ spring.config.activate.on-profile: prod
 spring:
   jpa:
     hibernate:
-      ddl-auto: update
+    ddl-auto: update
     properties:
       hibernate:
         format_sql: false

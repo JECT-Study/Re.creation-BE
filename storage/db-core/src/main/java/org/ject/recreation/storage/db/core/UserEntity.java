@@ -6,9 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "`user`")
@@ -33,9 +32,30 @@ public class UserEntity {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private UserRole role;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = true)
+    private ReportReason blockReason;
+
+    @Column(nullable = true)
+    private LocalDate blockedAt;
+
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    public void blockUser(ReportReason reason) {
+        this.role = UserRole.BLOCK;
+        this.blockReason = reason;
+        this.blockedAt = LocalDate.now();
+    }
+    public void unblockUser() {
+        this.role = UserRole.USER;
+        this.blockReason = null;
+        this.blockedAt = null;
+    }
 //    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 //    private List<GameEntity> games = new ArrayList<>();
 } 

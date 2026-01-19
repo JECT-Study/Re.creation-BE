@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.ject.recreation.core.api.controller.request.SocialLoginRequestDto;
 import org.ject.recreation.core.api.controller.response.SocialLoginResponseDto;
 import org.ject.recreation.core.domain.DefaultProfileImage;
@@ -19,6 +20,7 @@ import org.ject.recreation.storage.db.core.UserRepository;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 public class SocialLoginController {
     private final SocialLoginService socialLoginService;
     private final UserRepository userRepository;
@@ -41,10 +43,12 @@ public class SocialLoginController {
                 SessionUserInfoDto userInfo = SessionUserInfoDto.builder()
                     .email(response.getEmail())
                     .nickname(response.getNickname())
-                    .profileImageUrl(imagePrefix+response.getProfileImageUrl())
+                    .profileImageUrl(response.getProfileImageUrl())
                     .build();
                 session.setAttribute("userInfo", userInfo);
             }
+            log.info("----------Login successful------------");
+            log.info(response.toString());
             return ApiResponse.success(response);
         } catch (Exception e) {
             return ApiResponse.errorTyped(ErrorType.UNAUTHORIZED);
@@ -57,6 +61,9 @@ public class SocialLoginController {
                 + "?client_id=" + kakaoClientId
                 + "&redirect_uri=" + kakaoRedirectUri
         + "&response_type=code";
+        log.info("==========================================");
+        log.info(url);
+        log.info("==========================================");
         response.sendRedirect(url);
     }
 } 
