@@ -17,11 +17,14 @@ public class ReportGameDetailResponseDto {
     private String gameTitle;
     private String makerNickname;
     private String makerEmail;
+    private boolean isMakerBlock;
+    private ReportStatus status;
     private int questionCount;
     private long version;
     private List<GameDetailResponseDto.QuestionDto> qustions;
     private String reporterEmail;
     private String reporterNickname;
+    private boolean isReporterBlock;
     private GameReportReason reasonCode;
 
     public static ReportGameDetailResponseDto from(ReportEntity reportEntity) {
@@ -47,11 +50,14 @@ public class ReportGameDetailResponseDto {
                 .gameTitle(game.getGameTitle())
                 .makerNickname(gameCreator.getNickname())
                 .makerEmail(gameCreator.getEmail())
+                .isMakerBlock(gameCreator.getBlockReason() != null)
+                .status(reportEntity.getStatus())
                 .questionCount(game.getQuestionCount())
                 .version(game.getVersion())
                 .qustions(list)
                 .reporterEmail(reporter != null ? reporter.getEmail() : null)
                 .reporterNickname(reporter != null ? reporter.getNickname() : null)
+                .isReporterBlock(reporter.getBlockReason() != null)
                 .reasonCode(gameReportReason)
                 .build();
     }
