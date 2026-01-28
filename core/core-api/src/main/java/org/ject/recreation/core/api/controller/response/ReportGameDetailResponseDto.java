@@ -31,6 +31,7 @@ public class ReportGameDetailResponseDto {
         GameEntity game = reportEntity.getGame();
         UserEntity gameCreator = game.getGameCreator();
         UserEntity reporter = reportEntity.getReporter();
+
         List<QuestionEntity> questions = game.getQuestions();
 
         ReportReason reason = reportEntity.getReason();
@@ -46,18 +47,21 @@ public class ReportGameDetailResponseDto {
                         question.getVersion()))
                 .toList();
 
+        boolean isMakerBlock = gameCreator.getBlockReason() != null;
+        boolean isReporterBlock = reporter != null && reporter.getBlockReason() != null;
+
         return ReportGameDetailResponseDto.builder()
                 .gameTitle(game.getGameTitle())
                 .makerNickname(gameCreator.getNickname())
                 .makerEmail(gameCreator.getEmail())
-                .isMakerBlock(gameCreator.getBlockReason() != null)
+                .isMakerBlock(isMakerBlock)
                 .status(reportEntity.getStatus())
                 .questionCount(game.getQuestionCount())
                 .version(game.getVersion())
                 .qustions(list)
                 .reporterEmail(reporter != null ? reporter.getEmail() : null)
                 .reporterNickname(reporter != null ? reporter.getNickname() : null)
-                .isReporterBlock(reporter.getBlockReason() != null)
+                .isReporterBlock(isReporterBlock)
                 .reasonCode(gameReportReason)
                 .build();
     }
