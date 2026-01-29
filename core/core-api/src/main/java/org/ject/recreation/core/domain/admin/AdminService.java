@@ -3,6 +3,7 @@ package org.ject.recreation.core.domain.admin;
 import lombok.RequiredArgsConstructor;
 import org.ject.recreation.core.api.controller.request.BlockUserRequestDto;
 import org.ject.recreation.core.api.controller.request.GameDeleteRequestDto;
+import org.ject.recreation.core.api.controller.response.GameListResponseDto;
 import org.ject.recreation.core.api.controller.response.GetAllUserResponseDto;
 import org.ject.recreation.core.api.controller.response.ReportGameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.ReportGameResponseDto;
@@ -10,6 +11,7 @@ import org.ject.recreation.core.support.error.CoreException;
 import org.ject.recreation.core.support.error.ErrorType;
 import org.ject.recreation.core.support.response.PageResponseDto;
 import org.ject.recreation.storage.db.core.*;
+import org.springframework.context.support.BeanDefinitionDsl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,9 +29,11 @@ public class AdminService {
 
     private final ReportRepository reportRepository;
     private final UserRepository userRepository;
+    private final GameRepository gameRepository;
 
     public PageResponseDto<ReportGameResponseDto> getReportedGames(int page) {
         Pageable pageable = PageRequest.of(page, 7);
+//        BeanDefinitionDsl.Role
 //        return reportRepository.findAllForAdmin(pageable)
 //                .map(ReportGameResponseDto::from);
         Page<ReportGameResponseDto> result =
@@ -65,6 +69,24 @@ public class AdminService {
                     return new GetAllUserResponseDto(List.of(userInfoDto));
                 });
         return PageResponseDto.of(result);
+    }
+
+    public PageResponseDto<GameListResponseDto.GameDto> getAdminGames(int page) {
+        Pageable pageable = PageRequest.of(page, 7);
+//        return reportRepository.findAllForAdmin(pageable)
+//                .map(ReportGameResponseDto::from);
+        Page<GameEntity> allByAdmin = gameRepository.findAllByAdmin(pageable);
+        Page<GameListResponseDto.GameDto> list = allByAdmin.map(game ->
+                GameListResponseDto.GameDto.builder()
+                        .gameId(game.getGameId())
+                        .gameThumbnailUrl(game.getGameThumbnailUrl())
+                        .gameTitle(game.getGameTitle())
+                        .questionCount(game.getQuestionCount())
+                        .playCount(game.getPlayCount())
+                        .updatedAt(game.getUpdatedAt())
+                        .build()
+        );
+        return PageResponseDto.of(list);
     }
 
     public Void blockUser(BlockUserRequestDto blockUserRequestDto) {
