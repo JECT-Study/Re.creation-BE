@@ -21,7 +21,7 @@ public class ReportGameDetailResponseDto {
     private ReportStatus status;
     private int questionCount;
     private long version;
-    private List<GameDetailResponseDto.QuestionDto> qustions;
+    private List<GameDetailResponseDto.QuestionDto> questions;
     private String reporterEmail;
     private String reporterNickname;
     private boolean isReporterBlock;
@@ -58,7 +58,7 @@ public class ReportGameDetailResponseDto {
                 .status(reportEntity.getStatus())
                 .questionCount(game.getQuestionCount())
                 .version(game.getVersion())
-                .qustions(list)
+                .questions(list)
                 .reporterEmail(reporter != null ? reporter.getEmail() : null)
                 .reporterNickname(reporter != null ? reporter.getNickname() : null)
                 .isReporterBlock(isReporterBlock)
