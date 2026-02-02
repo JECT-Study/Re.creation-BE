@@ -51,7 +51,7 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ApiResponse<PageResponseDto<GetAllUserResponseDto>> getUsers(
+    public ApiResponse<PageResponseDto<GetAllUserResponseDto.UserInfoDto>> getUsers(
             @RequestParam(defaultValue = "0") int page
     ) {
         return ApiResponse.success(adminService.getAllUsers(page));

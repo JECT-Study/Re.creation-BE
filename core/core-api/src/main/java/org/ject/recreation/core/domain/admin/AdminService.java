@@ -59,15 +59,20 @@ public class AdminService {
         return null;
     }
 
-    public PageResponseDto<GetAllUserResponseDto> getAllUsers(int page) {
+    public PageResponseDto<GetAllUserResponseDto.UserInfoDto> getAllUsers(int page) {
         Pageable pageable = PageRequest.of(page, 7);
-        Page<GetAllUserResponseDto> result = userRepository.findAll(pageable)
-                .map(userEntity -> {
-                    // UserEntity를 UserInfoDto로 변환
-                    GetAllUserResponseDto.UserInfoDto userInfoDto = GetAllUserResponseDto.UserInfoDto.from(userEntity);
-                    // 단일 UserInfoDto를 포함하는 리스트를 생성하여 GetAllUserResponseDto로 감쌈
-                    return new GetAllUserResponseDto(List.of(userInfoDto));
-                });
+//        Page<GetAllUserResponseDto> result = userRepository.findAll(pageable)
+//                .map(userEntity -> {
+//                    // UserEntity를 UserInfoDto로 변환
+//                    GetAllUserResponseDto.UserInfoDto userInfoDto = GetAllUserResponseDto.UserInfoDto.from(userEntity);
+//                    // 단일 UserInfoDto를 포함하는 리스트를 생성하여 GetAllUserResponseDto로 감쌈
+//                    return new GetAllUserResponseDto(List.of(userInfoDto));
+//                });
+//        return PageResponseDto.of(result);
+        Page<GetAllUserResponseDto.UserInfoDto> result =
+                userRepository.findAll(pageable)
+                        .map(GetAllUserResponseDto.UserInfoDto::from);
+
         return PageResponseDto.of(result);
     }
 
