@@ -1,6 +1,7 @@
 package org.ject.recreation.core.domain.game;
 
 import org.ject.recreation.storage.db.core.GameEntity;
+import org.ject.recreation.storage.db.core.UserRole;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,10 +22,15 @@ public record Game(
         LocalDateTime deletedAt
 ) {
     public static Game from(GameEntity game) {
+        String nickname =
+                game.getGameCreator().getRole() == UserRole.ADMIN
+                        ? "게임마스터"
+                        : game.getGameCreator().getNickname();
+
         return new Game(
                 game.getGameId(),
                 game.getGameCreator().getEmail(),
-                game.getGameCreator().getNickname(),
+                nickname,
                 game.getGameTitle(),
                 game.getGameThumbnailUrl(),
                 game.isShared(),

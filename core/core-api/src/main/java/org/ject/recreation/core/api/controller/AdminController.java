@@ -3,6 +3,7 @@ package org.ject.recreation.core.api.controller;
 import lombok.extern.slf4j.Slf4j;
 import org.ject.recreation.core.api.controller.request.BlockUserRequestDto;
 import org.ject.recreation.core.api.controller.request.GameDeleteRequestDto;
+import org.ject.recreation.core.api.controller.response.GameListResponseDto;
 import org.ject.recreation.core.api.controller.response.GetAllUserResponseDto;
 import org.ject.recreation.core.api.controller.response.ReportGameDetailResponseDto;
 import org.ject.recreation.core.api.controller.response.ReportGameResponseDto;
@@ -28,6 +29,7 @@ public class AdminController {
         return ApiResponse.success(adminService.getReportedGames(page));
     }
 
+    // report 상세 내역 조회
     @GetMapping("games/{reportId}")
     public ApiResponse<ReportGameDetailResponseDto> getReportGame(
             @PathVariable Long reportId
@@ -40,8 +42,16 @@ public class AdminController {
         return ApiResponse.success(adminService.deleteReportedDetailGames(gameDeleteRequestDto));
     }
 
+
+    @GetMapping("games/admin")
+    public ApiResponse<PageResponseDto<GameListResponseDto.GameDto>> getAdminGames(
+            @RequestParam(defaultValue = "0") int page
+    ) {
+        return ApiResponse.success(adminService.getAdminGames(page));
+    }
+
     @GetMapping("/users")
-    public ApiResponse<PageResponseDto<GetAllUserResponseDto>> getUsers(
+    public ApiResponse<PageResponseDto<GetAllUserResponseDto.UserInfoDto>> getUsers(
             @RequestParam(defaultValue = "0") int page
     ) {
         return ApiResponse.success(adminService.getAllUsers(page));
@@ -53,7 +63,7 @@ public class AdminController {
     }
 
     @PostMapping("/users/unblock")
-    public ApiResponse<Void> unBlockUser(@RequestBody BlockUserRequestDto blockUserRequestDto){
+    public ApiResponse<Void> unBlockUser(@RequestBody BlockUserRequestDto blockUserRequestDto) {
         return ApiResponse.success(adminService.unBlockUser(blockUserRequestDto));
     }
 }

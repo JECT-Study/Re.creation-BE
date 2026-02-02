@@ -105,7 +105,7 @@ public class SocialLoginService {
                 .email(userEntity.getEmail())
                 .nickname(userEntity.getNickname())
                 .profileImageUrl(imagePrefix + userEntity.getProfileImageUrl())
-                .role(UserRole.USER)
+                .role(userEntity.getRole())
                 .build();
     }
 } 

@@ -17,17 +17,21 @@ public class ReportGameDetailResponseDto {
     private String gameTitle;
     private String makerNickname;
     private String makerEmail;
+    private boolean isMakerBlock;
+    private ReportStatus status;
     private int questionCount;
     private long version;
-    private List<GameDetailResponseDto.QuestionDto> qustions;
+    private List<GameDetailResponseDto.QuestionDto> questions;
     private String reporterEmail;
     private String reporterNickname;
+    private boolean isReporterBlock;
     private GameReportReason reasonCode;
 
     public static ReportGameDetailResponseDto from(ReportEntity reportEntity) {
         GameEntity game = reportEntity.getGame();
         UserEntity gameCreator = game.getGameCreator();
         UserEntity reporter = reportEntity.getReporter();
+
         List<QuestionEntity> questions = game.getQuestions();
 
         ReportReason reason = reportEntity.getReason();
@@ -43,15 +47,21 @@ public class ReportGameDetailResponseDto {
                         question.getVersion()))
                 .toList();
 
+        boolean isMakerBlock = gameCreator.getBlockReason() != null;
+        boolean isReporterBlock = reporter != null && reporter.getBlockReason() != null;
+
         return ReportGameDetailResponseDto.builder()
                 .gameTitle(game.getGameTitle())
                 .makerNickname(gameCreator.getNickname())
                 .makerEmail(gameCreator.getEmail())
+                .isMakerBlock(isMakerBlock)
+                .status(reportEntity.getStatus())
                 .questionCount(game.getQuestionCount())
                 .version(game.getVersion())
-                .qustions(list)
+                .questions(list)
                 .reporterEmail(reporter != null ? reporter.getEmail() : null)
                 .reporterNickname(reporter != null ? reporter.getNickname() : null)
+                .isReporterBlock(isReporterBlock)
                 .reasonCode(gameReportReason)
                 .build();
     }

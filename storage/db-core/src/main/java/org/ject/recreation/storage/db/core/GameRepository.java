@@ -1,5 +1,6 @@
 package org.ject.recreation.storage.db.core;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -50,4 +51,8 @@ public interface GameRepository extends JpaRepository<GameEntity, UUID>, InsertO
 
     // 기본 게임들을 조회하는 메서드
     List<GameEntity> findAllByGameCreatorEmailAndIsDeletedFalse(String gameCreatorEmail);
+
+    @Query(value = "SELECT g FROM GameEntity g JOIN g.gameCreator u WHERE u.role = 'ADMIN'",
+            countQuery = "SELECT count(g) FROM GameEntity g JOIN g.gameCreator u WHERE u.role = 'ADMIN'")
+    Page<GameEntity> findAllByAdmin( Pageable pageable);
 }
